@@ -1,0 +1,9 @@
+{
+  "name": "purescript-vdom-json",
+  "author": "Simon Van Casteren",
+  "dependencies": {
+    "virtual-dom": "2.1.1",
+    "vdom-serialized-patch": "FrigoEU/vdom-serialized-patch#master",
+    "vdom-as-json": "FrigoEU/vdom-as-json"
+  }
+}
