@@ -72,39 +72,6 @@ exports.applyPatch = function(node){
 //   return {prop: prop, val: prop};
 // };
 
-exports.mkWorkerFunctions = function(serializeProperty){
-  var functionIndex = { nextIndex: 0, map: {} };
-
-  function functionSerializer(key, func){
-    var index;
-    if (!func.vdomAsJsonFunctionIndex){
-      index = functionIndex.nextIndex.toString();
-      functionIndex.map.set(index, func); // Save into map so we can find function by index later
-      func.vdomAsJsonFunctionIndex = index; // Save index on function object so we don't make new indexes for the same function
-      functionIndex.nextIndex = functionIndex.nextIndex + 1;
-    } else {
-      index = func.vdomAsJsonFunctionIndex;
-    }
-
-    var r = serializeProperty(key), str;
-    str = "#" + index + "@" + r.val;
-
-    return [r.prop, str];
-  }
-
-  function handler(m){
-    var message = JSON.parse(m.data);
-    functionIndex.map.get(message.id)(message.data);
-  }
-
-  return {
-    functionSerializer: functionSerializer,
-    handler: handler
-  };
-};
-
-exports.crossAndAtRegex = /#(\d+)@(.*)/;
-
 // exports.mkMakeHandler = function(worker, replaceWithEventHandler){
 //   return function(str){
 //     var matches = str.match(regex), nr = matches[1], serialized = matches[2];
