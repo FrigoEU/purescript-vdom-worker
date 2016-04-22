@@ -1,60 +1,59 @@
-module VirtualDOM.Worker (
-  WEvent, 
-  on 
-  ) where
+module VirtualDOM.Worker where
 
 import WebWorker
-import Control.Bind (join)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception.Unsafe (unsafeThrow)
+import Control.Monad.Eff.Ref (REF)
 import Data.Argonaut.Core (Json)
 import Data.Argonaut.Decode (class DecodeJson)
 import Data.Argonaut.Encode (encodeJson, class EncodeJson)
 import Data.Array (index)
 import Data.Foreign (toForeign, Foreign)
+import Data.Int (fromString)
 import Data.Maybe (maybe)
 import Data.StrMap (StrMap, insert, lookup)
-import Data.String (split)
 import Data.String.Regex (Regex, match)
-import Data.Tuple (Tuple(Tuple))
-import Prelude (map, return, id, Unit, (<>), ($), (<<<), bind, (<$>), (>>=))
-import Unsafe.Coerce (unsafeCoerce)
-import VirtualDOM (FunctionSerializer, MakeDOMHandlers, DOM)
+import Prelude (show, class Show, unit, const, Unit, (<<<), return, bind, id, (<>), ($), map, (>>=))
+import VirtualDOM (Prop, prop, FunctionSerializer, MakeDOMHandlers, DOM)
 
-foreign import data Prop :: * -- TODO
-foreign import data MUT :: !
 foreign import crossAndAtRegex :: Regex
 
--- a : can be anything, just has to have a JsonEncode instance
+-- a : can be anything, just has to have a JsonEncode & JsonDecode instance
 data WEvent a = WEvent { event :: String 
                        , tag :: String }
 
-type WEventHandlers = StrMap (Foreign -> Eff (dom :: DOM) Json)
+type WEventHandlers = StrMap (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) Json)
 
-on :: forall eff a. WEvent a -> (a -> Eff eff Unit) -> Tuple String Prop
-on (WEvent {event, tag}) handler = Tuple (event <> "@" <> tag) $ unsafeCoerce handler
+on :: forall eff a. WEvent a -> (a -> Eff eff Unit) -> Prop
+on (WEvent {event, tag}) handler = prop ("on" <> event <> "@" <> tag) handler
 
-registerWEventHandler :: forall eff a. (EncodeJson a, DecodeJson a) =>
+registerWEventHandler :: forall a. (EncodeJson a, DecodeJson a) =>
                          WEventHandlers 
                          -> WEvent a 
-                         -> (Foreign -> Eff (dom :: DOM) a)
+                         -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) a)
                          -> WEventHandlers
 registerWEventHandler wes (WEvent {tag}) f = insert tag ((map encodeJson <<< f)) wes
 
 makeDOMHandlersForWEvents :: WebWorker -> WEventHandlers -> MakeDOMHandlers
 makeDOMHandlersForWEvents ww weh fullstr = 
   maybe 
-    (unsafeThrow $ "Couldn't find event handler for " <> fullstr) -- Wow, how suck, much crappy
+    (const $ return unit) -- Wow, how suck, much crappy
     id
     (do matches <- match crossAndAtRegex fullstr
-        mnr <- index matches 0
-        nr <- mnr
-        ms <- index matches 1
+        msnr <- index matches 1
+        snr <- msnr
+        nr <- fromString snr
+        ms <- index matches 2
         s <- ms
         evh <- lookup s weh
-        return ((postMessageToWW ww) <<< toForeign <<< {id: nr, data: _} <<< evh))
+        return (\ev -> evh ev 
+                 >>= \json -> postMessageToWW ww (toForeign $ show (Message {id: nr, data: json}))))
+
+-- TODO
+newtype Message = Message {id :: Int, data :: Json}
+instance showMessage :: Show Message where
+  show (Message {id: id, data: d}) = "{\"id\": " <> show id <> ", \"data\": " <> show d <> "}"
 
 foreign import mkWorkerFunctionsForWEvents :: forall eff. 
-                                Eff (mut :: MUT | eff) { functionSerializer :: FunctionSerializer, 
+                                Eff (ref :: REF | eff) { functionSerializer :: FunctionSerializer, 
                                                          handler :: String -> Eff eff Unit}
 

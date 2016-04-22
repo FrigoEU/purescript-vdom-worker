@@ -1,9 +1,20 @@
 {
   "name": "purescript-vdom-json",
   "author": "Simon Van Casteren",
+  "scripts": {
+    "--buildmain": "psc-bundle output/**/{index,foreign}.js --main Example.Main --module Example.Main | browserify -e - | java -jar compiler.jar --js_output_file static/main.js",
+    "--buildworker": "psc-bundle output/**/{index,foreign}.js --main Example.Worker --module Example.Worker | browserify -e - | java -jar compiler.jar --js_output_file static/worker.js",
+    "devmain": "psc-bundle output/**/{index,foreign}.js --main Example.Main --module Example.Main | browserify -e - -o static/main.js",
+    "devworker": "psc-bundle output/**/{index,foreign}.js --main Example.Worker --module Example.Worker | browserify -e - -o static/worker.js"
+  },
   "dependencies": {
     "virtual-dom": "2.1.1",
     "vdom-serialized-patch": "FrigoEU/vdom-serialized-patch#master",
     "vdom-as-json": "FrigoEU/vdom-as-json"
+  },
+  "eslintConfig": {
+    "rules": {
+      "global-strict": false
+    }
   }
 }

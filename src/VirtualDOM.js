@@ -49,43 +49,32 @@ exports.fromString = function(string){
   return JSON.parse(string);
 };
 
-exports.fromJson = function(makeEventHandlerSendToWorker){
-  var fj = require("vdom-as-json/fromJson");
-  return function(serializedPatches){
-    return fj(serializedPatches, makeEventHandlerSendToWorker);
-  };
-};
-
 exports.applyPatch = function(node){
   var ap = require("vdom-serialized-patch/patch");
   return function(patches){
-    return function(){
-      return ap(node, patches);
+    return function(makeDOMHandlers){
+      return function(){
+        return ap(node, patches, function(str){
+          return function(ev){
+            return makeDOMHandlers(str)(ev)();
+          };
+        });
+      };
     };
   };
 };
 
-// exports.exampleSerializeProp = function serializeProperty(prop){
-//   if (prop === "onclickxy"){
-//     return {prop: "onclick", val: "xy"};
-//   }
-//   return {prop: prop, val: prop};
-// };
+exports.prop = function(key){
+  return function(val){
+    return [key, val];
+  };
+};
 
-// exports.mkMakeHandler = function(worker, replaceWithEventHandler){
-//   return function(str){
-//     var matches = str.match(regex), nr = matches[1], serialized = matches[2];
-//     var message = {id: nr, data: null};
-
-//     // if (serialized === "xy"){
-//     //   return function(ev){
-//     //     message.data = {x: ev.pageX, y: ev.pageY};
-//     //     worker.postMessage(JSON.stringify(message));
-//     //   };
-//     // }
-
-//     return function(){
-//       worker.postMessage(JSON.stringify(message));
-//     };
-//   };
-// };
+exports.props = function(arr){
+  var obj = {}, a;
+  for (var i = 0; i < arr.length; i++){
+    a = arr[i];
+    obj[a[0]] = a[1];
+  }
+  return obj;
+};

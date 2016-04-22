@@ -1,7 +1,7 @@
 "use strict";
 
 // module VirtualDOM.Worker
-/* global require, exports, document */
+/* global exports */
 
 exports.crossAndAtRegex = /#(\d+)@(.*)/;
 
@@ -11,9 +11,9 @@ exports.mkWorkerFunctionsForWEvents = function(){
   function serializeProperty(str){
     var splitted = str.split("@");
     if (splitted.length === 2){
-      return {prop: str, val: str};
-    } else {
       return {prop: splitted[0], val: splitted[1]};
+    } else {
+      return {prop: str, val: str};
     }
   }
 
@@ -21,7 +21,7 @@ exports.mkWorkerFunctionsForWEvents = function(){
     var index;
     if (!func.vdomAsJsonFunctionIndex){
       index = functionIndex.nextIndex.toString();
-      functionIndex.map.set(index, func); // Save into map so we can find function by index later
+      functionIndex.map[index] = func; // Save into map so we can find function by index later
       func.vdomAsJsonFunctionIndex = index; // Save index on function object so we don't make new indexes for the same function
       functionIndex.nextIndex = functionIndex.nextIndex + 1;
     } else {
@@ -35,8 +35,8 @@ exports.mkWorkerFunctionsForWEvents = function(){
   }
 
   function handler(m){
-    var message = JSON.parse(m.data);
-    functionIndex.map.get(message.id)(message.data);
+    var message = JSON.parse(m);
+    return functionIndex.map[message.id](message.data);
   }
 
   return {

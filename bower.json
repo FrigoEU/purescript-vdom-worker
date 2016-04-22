@@ -15,6 +15,7 @@
     "purescript-unsafe-coerce": "*",
     "purescript-lists": "*",
     "purescript-argonaut-codecs": "*",
-    "purescript-maps": "*"
+    "purescript-maps": "*",
+    "purescript-refs": "*"
   }
 }
