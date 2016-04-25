@@ -1,9 +1,9 @@
 module Example.Component (renderExampleComponent) where
 
 import VirtualDOM
-import Example.Framework (Action(Add), Dispatch)
 import Example.WEvents (noopClick)
 import Prelude (show, (<>), (+), ($))
+import Example.Model (Dispatch, Action(Add))
 import VirtualDOM.Worker (on)
 
 renderExampleComponent :: Dispatch -> Int -> VTree

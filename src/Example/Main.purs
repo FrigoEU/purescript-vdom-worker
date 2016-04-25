@@ -2,14 +2,13 @@ module Example.Main where
 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (EXCEPTION)
-import Data.Either (either, Either)
-import Data.Foreign (ForeignError)
-import Data.Foreign.Class (readProp)
+import Data.Either (either)
+import Data.Foreign.Class (read)
 import Example.WEvents (allWEvents)
 import Prelude (Unit, const, bind)
 import VirtualDOM (DOM, applyPatch, fromString, appendToBody, createElement, props, div)
 import VirtualDOM.Worker (makeDOMHandlersForWEvents)
-import WebWorker (OwnsWW, mkWorker, onmessageFromWorker)
+import WebWorker (MessageEvent(MessageEvent), OwnsWW, mkWorker, onmessageFromWorker)
 
 main :: forall eff. Eff ( dom :: DOM , ownsww :: OwnsWW , exception :: EXCEPTION | eff ) Unit
 main = do 
@@ -19,11 +18,6 @@ main = do
   worker <- mkWorker "worker.js"
   let mdh = makeDOMHandlersForWEvents worker allWEvents
   let handleMessageFromWorker = 
-      (\fn -> let serializedPatches = (either (const []) 
-                                              fromString 
-                                              (readProp "data" fn :: Either ForeignError String))
-               in applyPatch node serializedPatches mdh)
+      \(MessageEvent {data: d}) -> let serPs = either (const []) fromString (read d)
+                                    in applyPatch node serPs mdh
   onmessageFromWorker worker handleMessageFromWorker
-
-
-

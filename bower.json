@@ -17,5 +17,8 @@
     "purescript-argonaut-codecs": "*",
     "purescript-maps": "*",
     "purescript-refs": "*"
+  },
+  "devDependencies":{
+    "purescript-test-unit": "*"
   }
 }
