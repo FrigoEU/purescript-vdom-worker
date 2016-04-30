@@ -1,13 +1,18 @@
 module VirtualDOM where
 
-import WebWorker
 import Control.Monad.Eff (Eff)
+import Data.Argonaut.Combinators ((.?))
+import Data.Argonaut.Core (jsonSingletonObject, JObject, Json)
+import Data.Argonaut.Decode (class DecodeJson, decodeJson)
+import Data.Argonaut.Encode (class EncodeJson)
 import Data.Foreign (Foreign)
-import Prelude (Unit)
+import Prelude (Unit, return, bind)
+import Unsafe.Coerce (unsafeCoerce)
+import WebWorker (OwnsWW)
 
 foreign import data VTree :: *
 foreign import data VPatch :: *
-foreign import data SerializedVPatch :: *
+foreign import data SerializedVPatches :: *
 foreign import data Node :: *
 foreign import data FunctionSerializer :: *
 
@@ -18,11 +23,9 @@ foreign import vtext :: String -> VTree
 foreign import createElement :: VTree -> Node
 foreign import appendToBody :: forall eff. Node -> Eff (dom :: DOM | eff) Unit
 foreign import diff :: VTree -> VTree -> Array VPatch
-foreign import applyPatch :: forall eff. Node -> Array SerializedVPatch -> MakeDOMHandlers -> Eff (dom :: DOM | eff) Unit
+foreign import applyPatch :: forall eff. Node -> SerializedVPatches -> MakeDOMHandlers -> Eff (dom :: DOM | eff) Unit
 
-foreign import toString :: Array SerializedVPatch -> String
-foreign import fromString :: String -> Array SerializedVPatch
-foreign import serializePatch :: FunctionSerializer -> Array VPatch -> Array SerializedVPatch
+foreign import serializePatch :: FunctionSerializer -> Array VPatch -> SerializedVPatches
 
 type MakeDOMHandlers = String -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) Unit)
 
@@ -46,13 +49,11 @@ height = prop "height"
 border :: String -> Prop
 border = prop "border"
 
+instance encodeJsonSerializedVPatches :: EncodeJson SerializedVPatches where
+  encodeJson obj = jsonSingletonObject "VirtualDOM.SerializedVPatches" (unsafeCoerce obj :: Json)
 
-
-
-
-
-
-
-
-
-
+instance decodeJsonSerializedVPatches :: DecodeJson SerializedVPatches where
+  decodeJson obj = do
+    jobj :: JObject <- decodeJson obj
+    servps :: Json <- jobj .? "VirtualDOM.SerializedVPatches"
+    return (unsafeCoerce servps :: SerializedVPatches)

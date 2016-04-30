@@ -1,27 +1,31 @@
 module VirtualDOM.Worker where
 
-import WebWorker
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Ref (REF)
+import Data.Argonaut.Combinators ((.?))
 import Data.Argonaut.Core (Json)
-import Data.Argonaut.Decode (class DecodeJson)
+import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Encode (encodeJson, class EncodeJson)
 import Data.Array (index)
 import Data.Either (either, Either)
-import Data.Foreign (toForeign, Foreign)
+import Data.Foreign (Foreign)
 import Data.Int (fromString)
 import Data.Maybe (maybe)
 import Data.StrMap (StrMap, insert, lookup)
 import Data.String.Regex (Regex, match)
-import Prelude (show, class Show, unit, const, Unit, (<<<), return, bind, id, (<>), ($), map, (>>=))
+import Prelude (Unit, return, ($), bind, (>>=), id, unit, const, map, (<<<), (<>))
+import Unsafe.Coerce (unsafeCoerce)
 import VirtualDOM (Prop, prop, FunctionSerializer, MakeDOMHandlers, DOM)
+import WebWorker (Channel, postMessageToWorkerC, WebWorker, OwnsWW)
 
 foreign import crossAndAtRegex :: Regex
 
 -- a : can be anything, just has to have a JsonEncode & JsonDecode instance
+-- decodeJson property is here so we get the correct typeclass instance immediately. 
+--   In the handler we don't have the type information anymore so the compiler can't know which DecodeJson instance to use
 data WEvent a = WEvent { event :: String 
                        , tag :: String 
-                       , decodeJson :: Json -> Either String a}
+                       , decodeJson :: Json -> Either String a} 
 
 type WEventHandlers = StrMap (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) Json)
 
@@ -38,8 +42,8 @@ registerWEventHandler :: forall a. (EncodeJson a, DecodeJson a) =>
                          -> WEventHandlers
 registerWEventHandler wes (WEvent {tag}) f = insert tag ((map encodeJson <<< f)) wes
 
-makeDOMHandlersForWEvents :: WebWorker -> WEventHandlers -> MakeDOMHandlers
-makeDOMHandlersForWEvents ww weh fullstr = 
+makeDOMHandlersForWEvents :: WebWorker -> Channel WEventMessage -> WEventHandlers -> MakeDOMHandlers
+makeDOMHandlersForWEvents ww ch weh fullstr = 
   maybe 
     (const $ return unit) -- Wow, how suck, much crappy
     id
@@ -51,14 +55,20 @@ makeDOMHandlersForWEvents ww weh fullstr =
         s <- ms
         evh <- lookup s weh
         return (\ev -> evh ev 
-                 >>= \json -> postMessageToWorker ww (toForeign $ show (Message {id: nr, data: json}))))
+                 >>= \json -> postMessageToWorkerC ww ch (WEventMessage {id: nr, data: json})))
 
 -- TODO
-newtype Message = Message {id :: Int, data :: Json}
-instance showMessage :: Show Message where
-  show (Message {id: id, data: d}) = "{\"id\": " <> show id <> ", \"data\": " <> show d <> "}"
+newtype WEventMessage = WEventMessage {id :: Int, data :: Json}
+instance encodeJsonWEventMessage :: EncodeJson WEventMessage where
+  encodeJson = unsafeCoerce
+instance decodeJsonWEvent :: DecodeJson WEventMessage where
+  decodeJson j = do 
+    strm <- decodeJson j
+    id <- strm .? "id"
+    d <- strm .? "data"
+    return $ WEventMessage {id, data: d}
 
-foreign import mkWorkerFunctionsForWEvents :: forall eff. 
-                                Eff (ref :: REF | eff) { functionSerializer :: FunctionSerializer, 
-                                                         handler :: String -> Eff eff Unit}
-
+foreign import mkWorkerFunctionsForWEvents :: forall eff1 eff2. 
+                                Eff (ref :: REF | eff1) 
+                                    { functionSerializer :: FunctionSerializer
+                                    , handler :: WEventMessage -> Eff (ref :: REF | eff2) Unit}

@@ -1,22 +1,21 @@
 module Test.Worker where
 
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Ref (REF, writeRef, readRef, newRef)
-import Data.Either (either)
-import Data.Foreign (toForeign)
-import Data.Foreign.Class (read)
-import Prelude (Unit, show, unit, return, const, ($), bind, (+))
-import Test.Main (ScreenXY(ScreenXY), screenXY)
-import VirtualDOM (serializePatch, diff, VTree, vtext, toString, div, props)
+import Data.StrMap (empty)
+import Prelude (Unit, show, ($), (+), bind)
+import Test.Main (wEventsChannel, patchesChannel, ScreenXY(ScreenXY), screenXY)
+import VirtualDOM (serializePatch, diff, VTree, vtext, div, props)
 import VirtualDOM.Worker (mkWorkerFunctionsForWEvents, on)
-import WebWorker (IsWW, MessageEvent(MessageEvent), postMessage, onmessage)
+import WebWorker (IsWW, onmessageC, registerChannel, postMessageC)
 
 data Action = Display Int
 type State = Int
-type AppEffects = (ref :: REF, isww :: IsWW)
+type AppEffects = (ref :: REF, isww :: IsWW, console :: CONSOLE)
 type Dispatch = Action -> Eff AppEffects Unit
 
-main :: Eff (ref :: REF, isww :: IsWW) Unit
+main :: Eff AppEffects Unit
 main = do
   {functionSerializer, handler} <- mkWorkerFunctionsForWEvents
   let initial = div (props []) []
@@ -31,10 +30,9 @@ main = do
         let serializedPatches = serializePatch functionSerializer patches
         writeRef stateRef newS
         writeRef treeRef newTree
-        postMessage (toForeign $ toString serializedPatches)
-  onmessage (\(MessageEvent {data: d}) -> either (const $ return unit)
-                                          handler
-                                          (read d))
+        postMessageC patchesChannel serializedPatches
+  let chs = registerChannel empty wEventsChannel handler
+  onmessageC chs
   dispatch $ Display 5
 
 testComponent :: Dispatch -> Int -> VTree

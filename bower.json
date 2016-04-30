@@ -19,6 +19,6 @@
     "purescript-refs": "*"
   },
   "devDependencies":{
-    "purescript-test-unit": "*"
+    "purescript-test-unit": "5.0.0"
   }
 }

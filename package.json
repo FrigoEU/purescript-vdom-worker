@@ -2,8 +2,8 @@
   "name": "purescript-vdom-worker",
   "author": "Simon Van Casteren",
   "scripts": {
-    "--buildmain": "psc-bundle output/**/{index,foreign}.js --main Example.Main --module Example.Main | browserify -e - | java -jar compiler.jar --js_output_file static/main.js",
-    "--buildworker": "psc-bundle output/**/{index,foreign}.js --main Example.Worker --module Example.Worker | browserify -e - | java -jar compiler.jar --js_output_file static/worker.js",
+    "buildmain": "psc-bundle output/**/{index,foreign}.js --main Example.Main --module Example.Main | browserify -e - | java -jar compiler.jar --js_output_file static/main.js -O SIMPLE",
+    "buildworker": "psc-bundle output/**/{index,foreign}.js --main Example.Worker --module Example.Worker | browserify -e - | java -jar compiler.jar --js_output_file static/worker.js -O SIMPLE",
     "devmain": "psc-bundle output/**/{index,foreign}.js --main Example.Main --module Example.Main | browserify -e - -o static/main.js",
     "devworker": "psc-bundle output/**/{index,foreign}.js --main Example.Worker --module Example.Worker | browserify -e - -o static/worker.js",
     "buildtestmain": "pulp build --main Test.Main && psc-bundle output/**/{index,foreign}.js --main Test.Main --module Test.Main | browserify -e - -o statictest/testmain.js",

@@ -34,9 +34,8 @@ exports.mkWorkerFunctionsForWEvents = function(){
     return [r.prop, str];
   }
 
-  function handler(m){
-    var message = JSON.parse(m);
-    return functionIndex.map[message.id](message.data);
+  function handler(weventmessage){
+    return functionIndex.map[weventmessage.id](weventmessage.data);
   }
 
   return {
@@ -44,4 +43,3 @@ exports.mkWorkerFunctionsForWEvents = function(){
     handler: handler
   };
 };
-

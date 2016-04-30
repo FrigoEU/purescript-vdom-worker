@@ -42,13 +42,6 @@ exports.serializePatch = function(functionSerializer){
   };
 };
 
-exports.toString = function(serializedPatches){
-  return JSON.stringify(serializedPatches);
-};
-exports.fromString = function(string){
-  return JSON.parse(string);
-};
-
 exports.applyPatch = function(node){
   var ap = require("vdom-serialized-patch/patch");
   return function(patches){
