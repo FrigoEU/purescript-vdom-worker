@@ -8,7 +8,8 @@ import Prelude (Unit, show, ($), (+), bind)
 import Test.Main (wEventsChannel, patchesChannel, ScreenXY(ScreenXY), screenXY)
 import VirtualDOM (serializePatch, diff, VTree, vtext, div, props)
 import VirtualDOM.Worker (mkWorkerFunctionsForWEvents, on)
-import WebWorker (IsWW, onmessageC, registerChannel, postMessageC)
+import WebWorker (IsWW)
+import WebWorker.Channel (onmessageC, registerChannel, postMessageC)
 
 data Action = Display Int
 type State = Int

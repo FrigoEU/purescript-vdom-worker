@@ -18,7 +18,8 @@ import Test.Unit.Assert (assert)
 import Test.Unit.Console (TESTOUTPUT)
 import VirtualDOM (SerializedVPatches, DOM, Node, applyPatch, appendToBody, createElement, props, div)
 import VirtualDOM.Worker (WEventMessage, WEventHandlers, registerWEventHandler, makeDOMHandlersForWEvents, WEvent(WEvent))
-import WebWorker (OwnsWW, Channel(Channel), onmessageFromWorkerC, registerChannel, mkWorker)
+import WebWorker (OwnsWW, mkWorker)
+import WebWorker.Channel (onmessageFromWorkerC, registerChannel, Channel(Channel))
 
 main :: forall eff. Eff ( dom :: DOM , ownsww :: OwnsWW , exception :: EXCEPTION, console :: CONSOLE, timer :: TIMER, avar :: AVAR, testOutput :: TESTOUTPUT | eff ) Unit
 main = runTest do

@@ -16,7 +16,8 @@ import Data.String.Regex (Regex, match)
 import Prelude (Unit, return, ($), bind, (>>=), id, unit, const, map, (<<<), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 import VirtualDOM (Prop, prop, FunctionSerializer, MakeDOMHandlers, DOM)
-import WebWorker (Channel, postMessageToWorkerC, WebWorker, OwnsWW)
+import WebWorker (WebWorker, OwnsWW)
+import WebWorker.Channel (postMessageToWorkerC, Channel())
 
 foreign import crossAndAtRegex :: Regex
 
