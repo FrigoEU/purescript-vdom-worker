@@ -20,7 +20,7 @@ foreign import data DOM :: !
 
 foreign import vnode :: String -> Props -> Array VTree -> VTree
 foreign import vtext :: String -> VTree
-foreign import createElement :: VTree -> Node
+foreign import createElement :: forall eff. VTree -> Eff (dom :: DOM | eff) Node
 foreign import appendToBody :: forall eff. Node -> Eff (dom :: DOM | eff) Unit
 foreign import diff :: VTree -> VTree -> Array VPatch
 foreign import applyPatch :: forall eff. Node -> SerializedVPatches -> MakeDOMHandlers -> Eff (dom :: DOM | eff) Unit

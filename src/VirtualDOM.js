@@ -18,8 +18,10 @@ exports.vtext = function vtext(str){
 };
 
 exports.createElement = function(vtree){
-  var createElement = require("virtual-dom/create-element");
-  return createElement(vtree);
+  return function(){
+    var createElement = require("virtual-dom/create-element");
+    return createElement(vtree);
+  };
 };
 
 exports.appendToBody = function(node){

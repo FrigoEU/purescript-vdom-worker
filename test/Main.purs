@@ -25,7 +25,7 @@ main :: forall eff. Eff ( dom :: DOM , ownsww :: OwnsWW , exception :: EXCEPTION
 main = runTest do
   test "make worker, click button, check that text = screenX + screenY" do
     let initial = div (props []) []
-    let node = createElement initial
+    node <- liftEff $ createElement initial
     liftEff $ appendToBody node
     ww <- liftEff $ mkWorker "testworker.js"
     let mdh = makeDOMHandlersForWEvents ww wEventsChannel allWEvents
