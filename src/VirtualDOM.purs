@@ -1,12 +1,12 @@
 module VirtualDOM where
 
 import Control.Monad.Eff (Eff)
-import Data.Argonaut.Combinators ((.?))
 import Data.Argonaut.Core (jsonSingletonObject, JObject, Json)
 import Data.Argonaut.Decode (class DecodeJson, decodeJson)
+import Data.Argonaut.Decode.Combinators ((.?))
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Foreign (Foreign)
-import Prelude (Unit, return, bind)
+import Prelude (pure, Unit, bind)
 import Unsafe.Coerce (unsafeCoerce)
 import WebWorker (OwnsWW)
 
@@ -56,4 +56,4 @@ instance decodeJsonSerializedVPatches :: DecodeJson SerializedVPatches where
   decodeJson obj = do
     jobj :: JObject <- decodeJson obj
     servps :: Json <- jobj .? "VirtualDOM.SerializedVPatches"
-    return (unsafeCoerce servps :: SerializedVPatches)
+    pure (unsafeCoerce servps :: SerializedVPatches)

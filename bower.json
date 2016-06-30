@@ -12,13 +12,13 @@
   ],
   "dependencies": {
     "purescript-webworkers": "https://github.com/FrigoEU/purescript-webworkers.git#master",
-    "purescript-unsafe-coerce": "*",
-    "purescript-lists": "*",
-    "purescript-argonaut-codecs": "*",
-    "purescript-maps": "*",
-    "purescript-refs": "*"
+    "purescript-unsafe-coerce": "1.0.0",
+    "purescript-lists": "1.0.1",
+    "purescript-argonaut-codecs": "1.0.0",
+    "purescript-maps": "1.1.0",
+    "purescript-refs": "1.0.0"
   },
   "devDependencies":{
-    "purescript-test-unit": "5.0.0"
+    "purescript-test-unit": "7.0.0"
   }
 }

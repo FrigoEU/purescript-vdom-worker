@@ -2,7 +2,7 @@ module VirtualDOM.Worker where
 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Ref (REF)
-import Data.Argonaut.Combinators ((.?))
+import Data.Argonaut.Decode.Combinators ((.?))
 import Data.Argonaut.Core (Json)
 import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Encode (encodeJson, class EncodeJson)
@@ -13,7 +13,7 @@ import Data.Int (fromString)
 import Data.Maybe (maybe)
 import Data.StrMap (StrMap, insert, lookup)
 import Data.String.Regex (Regex, match)
-import Prelude (Unit, return, ($), bind, unit, pure, (>>=), id, const, map, (<$>), (<>))
+import Prelude (Unit, ($), bind, unit, pure, (>>=), id, const, map, (<$>), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 import VirtualDOM (Prop, prop, FunctionSerializer, DeserializeHandlers, DOM)
 import WebWorker (WebWorker, OwnsWW)
@@ -33,7 +33,7 @@ type WEventHandlers = StrMap (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) (F J
 -- TODO: Possible to avoid making a new lambda every time?
 on :: forall eff a. (DecodeJson a) => WEvent a -> (a -> Eff eff Unit) -> Prop
 on (WEvent {event, tag, decodeJson}) handler = 
-  prop ("on" <> event <> "@" <> tag) (\fn -> either (\_ -> return unit) handler (decodeJson fn))
+  prop ("on" <> event <> "@" <> tag) (\fn -> either (\_ -> pure unit) handler (decodeJson fn))
 
 registerWEventHandler :: forall a. (EncodeJson a, DecodeJson a) =>
                          WEventHandlers 
@@ -45,7 +45,7 @@ registerWEventHandler wes (WEvent {tag}) f = insert tag (\ev -> map encodeJson <
 mkDeserializeHandlersForWEvents :: WebWorker -> Channel WEventMessage -> WEventHandlers -> DeserializeHandlers
 mkDeserializeHandlersForWEvents ww ch weh fullstr = 
   maybe 
-    (const $ return unit) -- TODO
+    (const $ pure unit) -- TODO
     id
     (do matches <- match crossAndAtRegex fullstr
         msnr <- index matches 1
@@ -54,7 +54,7 @@ mkDeserializeHandlersForWEvents ww ch weh fullstr =
         ms <- index matches 2
         s <- ms
         evh <- lookup s weh
-        return (\ev -> evh ev 
+        pure (\ev -> evh ev 
                  >>= \fj -> either (\_ -> pure unit) -- TODO
                                    (\json -> postMessageToWorkerC ww ch (WEventMessage {id: nr, data: json}))
                                    fj
@@ -68,7 +68,7 @@ instance decodeJsonWEvent :: DecodeJson WEventMessage where
     strm <- decodeJson j
     id <- strm .? "id"
     d <- strm .? "data"
-    return $ WEventMessage {id, data: d}
+    pure $ WEventMessage {id, data: d}
 
 foreign import mkWorkerFunctionsForWEvents :: forall eff1 eff2. 
                                 Eff (ref :: REF | eff1) 
