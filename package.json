@@ -7,7 +7,7 @@
     "devmain": "psc-bundle output/**/{index,foreign}.js --main Example.Main --module Example.Main | browserify -e - -o static/main.js",
     "devworker": "psc-bundle output/**/{index,foreign}.js --main Example.Worker --module Example.Worker | browserify -e - -o static/worker.js",
     "buildtestmain": "pulp build --main Test.Main && psc-bundle output/**/{index,foreign}.js --main Test.Main --module Test.Main | browserify -e - -o statictest/testmain.js",
-    "buildtestworker": "pulp build --main Test.Worker && psc-bundle  output/**/{index,foreign}.js --main Test.Worker --module Test.Worker | browserify -e - -o statictest/testworker.js"
+    "buildtestworker": "pulp build --main Test.Worker && psc-bundle output/**/{index,foreign}.js --main Test.Worker --module Test.Worker | browserify -e - -o statictest/testworker.js"
 
   },
   "dependencies": {

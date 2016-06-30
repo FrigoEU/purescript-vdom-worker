@@ -8,16 +8,16 @@ import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Encode (encodeJson, class EncodeJson)
 import Data.Array (index)
 import Data.Either (either, Either)
-import Data.Foreign (Foreign)
+import Data.Foreign (F, Foreign)
 import Data.Int (fromString)
 import Data.Maybe (maybe)
 import Data.StrMap (StrMap, insert, lookup)
 import Data.String.Regex (Regex, match)
-import Prelude (Unit, return, ($), bind, (>>=), id, unit, const, map, (<<<), (<>))
+import Prelude (Unit, return, ($), bind, unit, pure, (>>=), id, const, map, (<$>), (<>))
 import Unsafe.Coerce (unsafeCoerce)
-import VirtualDOM (Prop, prop, FunctionSerializer, MakeDOMHandlers, DOM)
+import VirtualDOM (Prop, prop, FunctionSerializer, DeserializeHandlers, DOM)
 import WebWorker (WebWorker, OwnsWW)
-import WebWorker.Channel (postMessageToWorkerC, Channel())
+import WebWorker.Channel (postMessageToWorkerC, Channel)
 
 foreign import crossAndAtRegex :: Regex
 
@@ -28,9 +28,9 @@ data WEvent a = WEvent { event :: String
                        , tag :: String 
                        , decodeJson :: Json -> Either String a} 
 
-type WEventHandlers = StrMap (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) Json)
+type WEventHandlers = StrMap (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) (F Json))
 
--- TODO: hier wordt telkens nieuwe functie gemaakt!!
+-- TODO: Possible to avoid making a new lambda every time?
 on :: forall eff a. (DecodeJson a) => WEvent a -> (a -> Eff eff Unit) -> Prop
 on (WEvent {event, tag, decodeJson}) handler = 
   prop ("on" <> event <> "@" <> tag) (\fn -> either (\_ -> return unit) handler (decodeJson fn))
@@ -38,15 +38,14 @@ on (WEvent {event, tag, decodeJson}) handler =
 registerWEventHandler :: forall a. (EncodeJson a, DecodeJson a) =>
                          WEventHandlers 
                          -> WEvent a 
-                         -- TODO: Dit is denk ik beter ... -> Eff (...) F a
-                         -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) a)
+                         -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) (F a))
                          -> WEventHandlers
-registerWEventHandler wes (WEvent {tag}) f = insert tag ((map encodeJson <<< f)) wes
+registerWEventHandler wes (WEvent {tag}) f = insert tag (\ev -> map encodeJson <$> f ev) wes
 
-makeDOMHandlersForWEvents :: WebWorker -> Channel WEventMessage -> WEventHandlers -> MakeDOMHandlers
-makeDOMHandlersForWEvents ww ch weh fullstr = 
+mkDeserializeHandlersForWEvents :: WebWorker -> Channel WEventMessage -> WEventHandlers -> DeserializeHandlers
+mkDeserializeHandlersForWEvents ww ch weh fullstr = 
   maybe 
-    (const $ return unit) -- Wow, how suck, much crappy
+    (const $ return unit) -- TODO
     id
     (do matches <- match crossAndAtRegex fullstr
         msnr <- index matches 1
@@ -56,9 +55,11 @@ makeDOMHandlersForWEvents ww ch weh fullstr =
         s <- ms
         evh <- lookup s weh
         return (\ev -> evh ev 
-                 >>= \json -> postMessageToWorkerC ww ch (WEventMessage {id: nr, data: json})))
+                 >>= \fj -> either (\_ -> pure unit) -- TODO
+                                   (\json -> postMessageToWorkerC ww ch (WEventMessage {id: nr, data: json}))
+                                   fj
+                                   ))
 
--- TODO
 newtype WEventMessage = WEventMessage {id :: Int, data :: Json}
 instance encodeJsonWEventMessage :: EncodeJson WEventMessage where
   encodeJson = unsafeCoerce

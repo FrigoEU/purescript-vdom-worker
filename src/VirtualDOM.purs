@@ -23,11 +23,11 @@ foreign import vtext :: String -> VTree
 foreign import createElement :: forall eff. VTree -> Eff (dom :: DOM | eff) Node
 foreign import appendToBody :: forall eff. Node -> Eff (dom :: DOM | eff) Unit
 foreign import diff :: VTree -> VTree -> Array VPatch
-foreign import applyPatch :: forall eff. Node -> SerializedVPatches -> MakeDOMHandlers -> Eff (dom :: DOM | eff) Unit
+foreign import applyPatch :: forall eff. Node -> SerializedVPatches -> DeserializeHandlers -> Eff (dom :: DOM | eff) Unit
 
 foreign import serializePatch :: FunctionSerializer -> Array VPatch -> SerializedVPatches
 
-type MakeDOMHandlers = String -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) Unit)
+type DeserializeHandlers = String -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) Unit)
 
 foreign import data Prop :: *
 foreign import data Props :: *

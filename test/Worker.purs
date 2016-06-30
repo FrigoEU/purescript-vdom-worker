@@ -5,7 +5,7 @@ import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Ref (REF, writeRef, readRef, newRef)
 import Data.StrMap (empty)
 import Prelude (Unit, show, ($), (+), bind)
-import Test.Main (wEventsChannel, patchesChannel, ScreenXY(ScreenXY), screenXY)
+import Test.Main (wEventsChannel, patchesChannel, ScreenXY(ScreenXY), clickXY)
 import VirtualDOM (serializePatch, diff, VTree, vtext, div, props)
 import VirtualDOM.Worker (mkWorkerFunctionsForWEvents, on)
 import WebWorker (IsWW)
@@ -39,7 +39,7 @@ main = do
 testComponent :: Dispatch -> Int -> VTree
 testComponent dispatch n = div ps children
   where 
-    ps = props [on screenXY (\(ScreenXY {x, y}) -> dispatch (Display $ x + y))]
+    ps = props [on clickXY (\(ScreenXY {x, y}) -> dispatch (Display $ x + y))]
     children = [vtext $ show n]
 
 update :: Action -> State -> State
