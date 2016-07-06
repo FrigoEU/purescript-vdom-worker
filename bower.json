@@ -16,7 +16,8 @@
     "purescript-lists": "1.0.1",
     "purescript-argonaut-codecs": "1.0.0",
     "purescript-maps": "1.1.0",
-    "purescript-refs": "1.0.0"
+    "purescript-refs": "1.0.0",
+    "purescript-dom": "1.1.0"
   },
   "devDependencies":{
     "purescript-test-unit": "7.0.0"

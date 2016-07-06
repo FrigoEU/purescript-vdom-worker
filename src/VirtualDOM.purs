@@ -1,6 +1,7 @@
 module VirtualDOM where
 
 import Control.Monad.Eff (Eff)
+import DOM (DOM)
 import Data.Argonaut.Core (jsonSingletonObject, JObject, Json)
 import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Decode.Combinators ((.?))
@@ -15,8 +16,6 @@ foreign import data VPatch :: *
 foreign import data SerializedVPatches :: *
 foreign import data Node :: *
 foreign import data FunctionSerializer :: *
-
-foreign import data DOM :: !
 
 foreign import vnode :: String -> Props -> Array VTree -> VTree
 foreign import vtext :: String -> VTree
