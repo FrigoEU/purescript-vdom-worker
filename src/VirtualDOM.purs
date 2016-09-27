@@ -33,20 +33,8 @@ foreign import data Props :: *
 foreign import prop :: forall a. String -> a -> Prop
 foreign import props :: Array Prop -> Props
 
-div :: Props -> Array VTree -> VTree
-div = vnode "div"
-
-checked :: Boolean -> Prop
-checked = prop "checked"
-
-width :: String -> Prop
-width = prop "width"
-
-height :: String -> Prop
-height = prop "height"
-
-border :: String -> Prop
-border = prop "border"
+vn :: String -> Array Prop -> Array VTree -> VTree
+vn tag ps = vnode tag (props ps)
 
 instance encodeJsonSerializedVPatches :: EncodeJson SerializedVPatches where
   encodeJson obj = jsonSingletonObject "VirtualDOM.SerializedVPatches" (unsafeCoerce obj :: Json)

@@ -1,5 +1,8 @@
 Work in progress!!
 
+TODO:
+Support key property on VNode!
+
 Introductory blog post: 
 http://frigoeu.github.io/vdomworker.html
 
