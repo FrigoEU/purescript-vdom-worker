@@ -32,7 +32,7 @@ exports.mkWorkerFunctionsForWEvents = function(){
     var r = serializeProperty(key), str;
     str = "#" + index + "@" + r.val;
 
-    return [r.prop, str];
+    return {prop: r.prop, id: str};
   }
 
   function handler(weventmessage){

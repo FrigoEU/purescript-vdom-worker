@@ -7,6 +7,7 @@ import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Decode.Combinators ((.?))
 import Data.Argonaut.Encode (class EncodeJson)
 import Data.Foreign (Foreign)
+import Data.Function.Uncurried (Fn2)
 import Prelude (pure, Unit, bind)
 import Unsafe.Coerce (unsafeCoerce)
 import WebWorker (OwnsWW)
@@ -15,7 +16,8 @@ foreign import data VTree :: *
 foreign import data VPatch :: *
 foreign import data SerializedVPatches :: *
 foreign import data Node :: *
-foreign import data FunctionSerializer :: *
+
+type FunctionSerializer = forall a. Fn2 String a {prop :: String, id :: String}
 
 foreign import vnode :: String -> Props -> Array VTree -> VTree
 foreign import vtext :: String -> VTree
