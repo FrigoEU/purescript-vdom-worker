@@ -1,6 +1,6 @@
 module VirtualDOM.HTML where
 
-import VirtualDOM (vn, prop, VTree, Prop)
+import VirtualDOM (Prop, vn, prop, VTree)
 
 div :: Array Prop -> Array VTree -> VTree
 div = vn "div"
@@ -63,6 +63,8 @@ selected :: Boolean -> Prop
 selected = prop "selected"
 checked :: Boolean -> Prop
 checked = prop "checked"
+value :: String -> Prop
+value = prop "value"
 
 width :: String -> Prop
 width = prop "width"
