@@ -1,6 +1,7 @@
 module VirtualDOM.Worker where
 
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
 import DOM (DOM)
 import Data.Argonaut.Core (Json)
@@ -29,7 +30,7 @@ data WEvent a = WEvent { event :: String
                        , tag :: String 
                        , decodeJson :: Json -> Either String a} 
 
-type WEventHandlers = StrMap (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) (F Json))
+type WEventHandlers = StrMap (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) (F Json))
 
 -- TODO: Possible to avoid making a new lambda every time?
 on :: forall eff a. (DecodeJson a) => WEvent a -> (a -> Eff eff Unit) -> Prop
@@ -39,13 +40,13 @@ on (WEvent {event, tag, decodeJson}) handler =
 registerWEventHandler :: forall a. (EncodeJson a, DecodeJson a) =>
                          WEventHandlers 
                          -> WEvent a 
-                         -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) (F a))
+                         -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) (F a))
                          -> WEventHandlers
 registerWEventHandler wes (WEvent {tag}) f = insert tag (\ev -> map encodeJson <$> f ev) wes
 
 mkDeserializeHandlersForWEvents :: WebWorker -> Channel WEventMessage -> WEventHandlers -> DeserializeHandlers
 mkDeserializeHandlersForWEvents ww ch weh fullstr = 
-  maybe 
+  maybe
     (const $ pure unit) -- TODO
     id
     (do matches <- match crossAndAtRegex fullstr

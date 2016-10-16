@@ -1,6 +1,7 @@
 module VirtualDOM where
 
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Exception (EXCEPTION)
 import DOM (DOM)
 import Data.Argonaut.Core (jsonSingletonObject, JObject, Json)
 import Data.Argonaut.Decode (class DecodeJson, decodeJson)
@@ -28,7 +29,7 @@ foreign import applyPatch :: forall eff. Node -> SerializedVPatches -> Deseriali
 
 foreign import serializePatch :: FunctionSerializer -> Array VPatch -> SerializedVPatches
 
-type DeserializeHandlers = String -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW) Unit)
+type DeserializeHandlers = String -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) Unit)
 
 foreign import data Prop :: *
 foreign import data Props :: *
