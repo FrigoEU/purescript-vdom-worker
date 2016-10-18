@@ -38,6 +38,8 @@ li :: Array Prop -> Array VTree -> VTree
 li = vn "li"
 a :: Array Prop -> Array VTree -> VTree
 a = vn "a"
+form :: Array Prop -> Array VTree -> VTree
+form = vn "form"
 
 src :: String -> Prop
 src = prop "src"
@@ -45,6 +47,8 @@ cl :: String -> Prop
 cl = prop "className"
 style :: String -> Prop
 style = prop "style"
+name :: String -> Prop
+name = prop "name"
 typeP :: String -> Prop
 typeP = prop "type"
 id :: String -> Prop
