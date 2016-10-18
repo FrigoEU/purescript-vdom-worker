@@ -4,6 +4,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
 import DOM (DOM)
+import DOM.Event.Event (Event)
 import Data.Argonaut.Core (Json)
 import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Decode.Combinators ((.?))
@@ -30,7 +31,7 @@ data WEvent a = WEvent { event :: String
                        , tag :: String 
                        , decodeJson :: Json -> Either String a} 
 
-type WEventHandlers = StrMap (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) (F Json))
+type WEventHandlers = StrMap (Event -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) (F Json))
 
 -- TODO: Possible to avoid making a new lambda every time?
 on :: forall eff a. (DecodeJson a) => WEvent a -> (a -> Eff eff Unit) -> Prop
@@ -40,7 +41,7 @@ on (WEvent {event, tag, decodeJson}) handler =
 registerWEventHandler :: forall a. (EncodeJson a, DecodeJson a) =>
                          WEventHandlers 
                          -> WEvent a 
-                         -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) (F a))
+                         -> (Event -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) (F a))
                          -> WEventHandlers
 registerWEventHandler wes (WEvent {tag}) f = insert tag (\ev -> map encodeJson <$> f ev) wes
 

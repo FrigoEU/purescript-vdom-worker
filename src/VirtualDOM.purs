@@ -3,11 +3,11 @@ module VirtualDOM where
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import DOM (DOM)
+import DOM.Event.Event (Event)
 import Data.Argonaut.Core (jsonSingletonObject, JObject, Json)
 import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Decode.Combinators ((.?))
 import Data.Argonaut.Encode (class EncodeJson)
-import Data.Foreign (Foreign)
 import Data.Function.Uncurried (Fn2)
 import Prelude (pure, Unit, bind)
 import Unsafe.Coerce (unsafeCoerce)
@@ -29,7 +29,7 @@ foreign import applyPatch :: forall eff. Node -> SerializedVPatches -> Deseriali
 
 foreign import serializePatch :: FunctionSerializer -> Array VPatch -> SerializedVPatches
 
-type DeserializeHandlers = String -> (Foreign -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) Unit)
+type DeserializeHandlers = String -> (Event -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) Unit)
 
 foreign import data Prop :: *
 foreign import data Props :: *
