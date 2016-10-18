@@ -45,6 +45,8 @@ cl :: String -> Prop
 cl = prop "className"
 style :: String -> Prop
 style = prop "style"
+typeP :: String -> Prop
+typeP = prop "type"
 id :: String -> Prop
 id = prop "id"
 rowspan :: Int -> Prop
