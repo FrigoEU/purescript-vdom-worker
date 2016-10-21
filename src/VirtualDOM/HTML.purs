@@ -40,6 +40,8 @@ a :: Array Prop -> Array VTree -> VTree
 a = vn "a"
 form :: Array Prop -> Array VTree -> VTree
 form = vn "form"
+label :: Array Prop -> Array VTree -> VTree
+label = vn "form"
 
 src :: String -> Prop
 src = prop "src"
