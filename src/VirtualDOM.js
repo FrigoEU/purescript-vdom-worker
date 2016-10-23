@@ -3,8 +3,8 @@
 // module VirtualDOM
 /* global require, exports, document */
 
+var VNode = require("virtual-dom/vnode/vnode");
 exports.vnode = function vnode(tag){
-  var VNode = require("virtual-dom/vnode/vnode");
   return function(props){
     return function(children){
       return new VNode(tag, props, children);
@@ -12,14 +12,14 @@ exports.vnode = function vnode(tag){
   };
 };
 
+var VText = require("virtual-dom/vnode/vtext");
 exports.vtext = function vtext(str){
-  var VText = require("virtual-dom/vnode/vtext");
   return new VText(str);
 };
 
+var createElement = require("virtual-dom/create-element");
 exports.createElement = function(vtree){
   return function(){
-    var createElement = require("virtual-dom/create-element");
     return createElement(vtree);
   };
 };
@@ -30,22 +30,22 @@ exports.appendToBody = function(node){
   };
 };
 
+var diff = require("virtual-dom/diff");
 exports.diff = function(vtree1){
-  var diff = require("virtual-dom/diff");
   return function(vtree2){
     return diff(vtree1, vtree2);
   };
 };
 
-exports.serializePatch = function(functionSerializer){
-  var serializePatch = require("vdom-serialized-patch/serialize");
+var serializePatch = require("vdom-serialized-patch/serialize");
+exports.serializePatchImpl = function(functionSerializer){
   return function(patches){
     return serializePatch(patches, functionSerializer);
   };
 };
 
+var ap = require("vdom-serialized-patch/patch");
 exports.applyPatch = function(node){
-  var ap = require("vdom-serialized-patch/patch");
   return function(patches){
     return function(makeDOMHandlers){
       return function(){
