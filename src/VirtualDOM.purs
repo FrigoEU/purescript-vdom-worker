@@ -4,6 +4,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import DOM (DOM)
 import DOM.Event.Event (Event)
+import DOM.Node.Types (Node)
 import Data.Argonaut.Core (jsonSingletonObject, JObject, Json)
 import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Decode.Combinators ((.?))
@@ -16,8 +17,6 @@ import WebWorker (OwnsWW)
 foreign import data VTree :: *
 foreign import data VPatch :: *
 foreign import data SerializedVPatches :: *
-foreign import data Node :: *
-
 
 foreign import vnode :: String -> Props -> Array VTree -> VTree
 foreign import vtext :: String -> VTree
