@@ -1,24 +1,34 @@
 // module VirtualDOM.SEvent
 
+// This is a terrible function that clones PureScript ADT's/records
+// very unsafely and fills in the "val" property
 exports.magic = function(action){
   return function(a){
-    if (action.constructor.value){
-      return action.constructor.value;
-    } else if (action.constructor.create){
-      var v0 = {}, keys, l, i;
-      if(action.value0){
-        keys = Object.keys(action.value0);
-        l = keys.length;
-        for (i = 0; i < l; i++){
-          v0[keys[i]] = action.value0[keys[i]];
-        }
-        if(v0.val !== undefined){
-          v0.val = a;
-        }
-      }
-      return action.constructor.create(v0);
-    } else {
-      throw new Error("Invalid Action provided to Client.SEvents.magic");
-    }
+    return cloneAndFillVal(action, a);
   };
 };
+
+function cloneAndFillVal(action, valToFill){
+  var returnVal;
+  if (action.constructor.value){
+    returnVal = action.constructor.value;
+  } else if(action == null || typeof action !== "object"){
+    returnVal = action;
+  } else {
+    returnVal = createUntilDone(action);
+    for (var prop in action) {
+      if (action.hasOwnProperty(prop)) {
+        returnVal[prop] = (prop === "val") ?
+          valToFill : cloneAndFillVal(action[prop], valToFill);
+      }
+    }
+  }
+  return returnVal;
+}
+function createUntilDone(action){
+  var returnVal = action.constructor.create(action.constructor);
+  while (typeof returnVal === "function"){
+    returnVal = returnVal();
+  }
+  return returnVal;
+}

@@ -1,4 +1,4 @@
-module VirtualDOM.SEvent (on, on', mkUIHandlers, SEvent(..), SEventS, click, change, submit) where
+module VirtualDOM.SEvent (on, on', mkUIHandlers, SEvent(..), SEventS, click, change, submit, magic) where
 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (throw, EXCEPTION)

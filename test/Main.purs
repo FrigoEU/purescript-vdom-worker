@@ -1,50 +1,44 @@
 module Test.Main where
 
-import Control.Monad.Aff (later')
-import Control.Monad.Aff.AVar (AVAR)
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (CONSOLE)
-import Control.Monad.Eff.Exception (EXCEPTION)
-import Control.Monad.Eff.Timer (TIMER)
-import DOM (DOM)
-import Data.Exists (mkExists)
-import Data.StrMap (empty)
-import Prelude (Unit, bind, (==), ($))
+import Prelude (class Eq, bind, eq, ($))
 import Test.Unit (test)
 import Test.Unit.Assert (assert)
-import Test.Unit.Console (TESTOUTPUT)
 import Test.Unit.Main (runTest)
-import Test.Worker (patchesChannel, actionsChannel, clickXY)
-import VirtualDOM (Node, applyPatch, appendToBody, createElement)
-import VirtualDOM.HTML (div)
-import VirtualDOM.SEvent (mkUIHandlers)
-import WebWorker (OwnsWW, mkWorker, terminateWorker)
-import WebWorker.Channel (onmessageFromWorkerC, registerChannel)
+import VirtualDOM.SEvent (magic)
 
-main :: forall eff. Eff ( dom :: DOM , ownsww :: OwnsWW , err :: EXCEPTION, console :: CONSOLE, timer :: TIMER, avar :: AVAR, testOutput :: TESTOUTPUT | eff ) Unit
-main = runTest do
-  testWithWorker
-  {-- testWithoutWorker --}
+main = runTest $ test "magic" do
+  testMagicNoProps
+  testMagicSimple
+  testMagicSubAction
+  testMagicRecursiveAction
 
-testWithWorker =
-  test "make worker, click button, check that text = screenX + screenY" do
-    let initial = div [] []
-    node <- liftEff $ createElement initial
-    liftEff $ appendToBody node
-    ww <- liftEff $ mkWorker "testworker.js"
-    let allEvents = [mkExists clickXY]
-    let mdh = mkUIHandlers allEvents ww actionsChannel
-    let chs = registerChannel empty patchesChannel (\sps -> applyPatch node sps mdh)
-    liftEff $ onmessageFromWorkerC ww chs
-    later' 500 do
-      inner <- liftEff $ innerHTML node
-      assert "first rendered with 5" (inner == "5")
-      liftEff $ sendClick node 100 23
-      later' 50 do
-        innr <- liftEff $ innerHTML node
-        assert "second rendered with 123" (innr == "123")
-        liftEff (terminateWorker ww)
+data SubAction = SubAction1 {val :: String}
+               | SubAction2 String SubAction
+data Action = Action0
+            | Action1 {val :: String}
+            | Action2 SubAction
+derive instance eqSubAction :: Eq SubAction
+derive instance eqAction :: Eq Action
 
-foreign import innerHTML :: forall eff. Node -> Eff (dom :: DOM | eff) String
-foreign import sendClick :: forall eff. Node -> Int -> Int -> Eff (dom :: DOM | eff) Unit
+testMagicNoProps = assert
+                  "Doesn't work with noPropsAction"
+                  ((magic Action0 "abc") `eq` (Action0))
+
+testMagicSimple = assert
+                  "Doesn't work with simpleAction"
+                  ((magic (Action1 {val: ""}) "abc") `eq` (Action1 {val: "abc"}))
+
+testMagicSubAction = assert
+                     "Doesn't work with SubAction"
+                     ((magic (Action2 (SubAction1 {val: ""})) "abc") `eq` (Action2 (SubAction1 {val: "abc"})))
+
+testMagicRecursiveAction = assert
+                     "Doesn't work with RecursiveAction"
+                     ((magic (Action2
+                              (SubAction2 "bla"
+                               (SubAction2 "bla"
+                                (SubAction1 {val: ""})))) "abc")
+                      `eq` (Action2
+                              (SubAction2 "bla"
+                               (SubAction2 "bla"
+                                (SubAction1 {val: "abc"})))))

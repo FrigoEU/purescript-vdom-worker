@@ -1,6 +1,5 @@
 "use strict";
 
-// module Test.Main
 /* global window, MouseEvent, exports */
 
 exports.innerHTML = function(el){
