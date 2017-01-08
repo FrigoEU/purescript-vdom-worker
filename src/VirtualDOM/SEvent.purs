@@ -21,7 +21,7 @@ import Data.String (length, drop, take)
 import Prelude ((>>>), const, (<<<), (*>), show, Unit, pure, unit, (>>=), ($), (==), (#), (<>))
 import VirtualDOM (prop, Prop)
 import WebWorker (WebWorker, OwnsWW)
-import WebWorker.Channel (postMessageToWorkerC, Channel)
+import WebWorker.Channel (Channel, postMessageToWorkerC)
 
 -- The central data structure. I limited the effects to DOM, OwnsWW and EXCEPTION,
 -- not sure if that's a good idea in the long term
@@ -60,11 +60,12 @@ foreign import magic :: forall a act. act -> a -> act
 -- * The SEvents are wrapped in Exists so we can put them all in a single array and iterate over them
 -- * it's up to the user of this library to make sure the same "act" type
 --   parameter is used on the webworker thread as on the ui thread
-mkUIHandlers :: forall act. (EncodeJson act, DecodeJson act) =>
-                Array SEventS -> WebWorker -> Channel act
+mkUIHandlers' :: forall act. (EncodeJson act, DecodeJson act) =>
+                Array SEventS
+                -> (act -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) Unit)
                 -> (String
                     -> (Event -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) Unit))
-mkUIHandlers events ww chan =
+mkUIHandlers' events go =
   \str ->
    -- ^ This string is the string made by on/on', without the "_vdom_as_json_" part
     let foundSEvent = find (runExists (\(SEvent {id}) -> startsWith id str)) events
@@ -75,11 +76,17 @@ mkUIHandlers events ww chan =
                     (\s _ -> throw ("Failed to parse action from " <> str <> ": " <> s))
                     (\action ev -> handle ev >>= runExcept >>> either
                                                   (throw <<< (<>) "Failed to extract value from event: " <<< show)
-                                                  (postMessageToWorkerC ww chan <<< magic action))
+                                                  (go <<< magic action))
                                                   -- ^ everything ok, fill in val and send back
                     ((drop (length id) str # jsonParser >>= decodeJson) :: Either String act)))
                     -- ^ Parsing the action
               foundSEvent
+
+mkUIHandlers :: forall act. ( EncodeJson act , DecodeJson act) =>
+                Array (Exists SEvent) ->
+                WebWorker -> Channel act ->
+                (String -> (Event -> Eff ( dom :: DOM , ownsww :: OwnsWW , err :: EXCEPTION) Unit))
+mkUIHandlers evs ww chan = mkUIHandlers' evs (postMessageToWorkerC ww chan)
 
 -- utility function
 startsWith :: String -> String -> Boolean
