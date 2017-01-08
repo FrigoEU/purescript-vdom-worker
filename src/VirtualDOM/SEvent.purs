@@ -1,7 +1,7 @@
 module VirtualDOM.SEvent (on, on', mkUIHandlers, SEvent(..), SEventS, click, change, submit, magic, mkUIHandlers') where
 
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception (throw, EXCEPTION)
+import Control.Monad.Eff.Exception (EXCEPTION, throw)
 import Control.Monad.Except (runExcept)
 import DOM (DOM)
 import DOM.Event.Event (preventDefault)
@@ -23,21 +23,19 @@ import VirtualDOM (prop, Prop)
 import WebWorker (WebWorker, OwnsWW)
 import WebWorker.Channel (Channel, postMessageToWorkerC)
 
--- The central data structure. I limited the effects to DOM, OwnsWW and EXCEPTION,
--- not sure if that's a good idea in the long term
-newtype SEvent a = SEvent { event :: String
+newtype SEvent e a = SEvent { event :: String
                           , id :: String
-                          , handle :: Event -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) (F a)}
-type SEventS = Exists SEvent
+                          , handle :: Event -> Eff e (F a)}
+type SEventS e = Exists (SEvent e)
 
 -- on makes a property (eg: onclick, onchange) based on the SEvent
 -- the value of this property consists of three parts:
 -- * "_vdom_as_json_": this is to signal to the vdom-as-json library that we want to do some custom logic on this prop/value at the UI thread side
 -- * id of event: we'll use this to identify the event handler that we need to execute. These handlers need to be registred on the UI thread and passed to mkUIHandlers since we can't transmit event handlers (= functions!) between threads
 -- * JsonEncoded (partial) action: Here we require that the action constructor takes a record as only argument and this record has a val property with the same type as the value that the handler of the SEvent produces
-on :: forall a obj act.
+on :: forall a e obj act.
       (Monoid a, EncodeJson act) =>
-      SEvent a
+      SEvent e a
       -> ({val :: a | obj} -> act)
       -> {val :: a | obj}
       -> Prop
@@ -45,7 +43,7 @@ on (SEvent {event, id}) constr rest =
   prop event ("_vdom_as_json_" <> id <> printJson (encodeJson (constr rest)))
 
 -- special case for actions that don't need any value returned from the UI thread
-on' :: forall a act. (EncodeJson act) => SEvent a -> act -> Prop
+on' :: forall a e act. (EncodeJson act) => SEvent e a -> act -> Prop
 on' (SEvent {event, id}) action =
   prop (event) ("_vdom_as_json_" <> id <> printJson (encodeJson action))
 
@@ -60,11 +58,11 @@ foreign import magic :: forall a act. act -> a -> act
 -- * The SEvents are wrapped in Exists so we can put them all in a single array and iterate over them
 -- * it's up to the user of this library to make sure the same "act" type
 --   parameter is used on the webworker thread as on the ui thread
-mkUIHandlers' :: forall act. (EncodeJson act, DecodeJson act) =>
-                Array SEventS
-                -> (act -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) Unit)
+mkUIHandlers' :: forall act e. (EncodeJson act, DecodeJson act) =>
+                Array (SEventS (err :: EXCEPTION | e))
+                -> (act -> Eff (err :: EXCEPTION | e) Unit)
                 -> (String
-                    -> (Event -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) Unit))
+                    -> (Event -> Eff (err :: EXCEPTION | e) Unit))
 mkUIHandlers' events go =
   \str ->
    -- ^ This string is the string made by on/on', without the "_vdom_as_json_" part
@@ -82,10 +80,10 @@ mkUIHandlers' events go =
                     -- ^ Parsing the action
               foundSEvent
 
-mkUIHandlers :: forall act. ( EncodeJson act , DecodeJson act) =>
-                Array (Exists SEvent) ->
+mkUIHandlers :: forall act e. (EncodeJson act, DecodeJson act) =>
+                Array (Exists (SEvent (err :: EXCEPTION, ownsww :: OwnsWW | e))) ->
                 WebWorker -> Channel act ->
-                (String -> (Event -> Eff ( dom :: DOM , ownsww :: OwnsWW , err :: EXCEPTION) Unit))
+                (String -> (Event -> Eff (err :: EXCEPTION, ownsww :: OwnsWW | e) Unit))
 mkUIHandlers evs ww chan = mkUIHandlers' evs (postMessageToWorkerC ww chan)
 
 -- utility function
@@ -93,17 +91,17 @@ startsWith :: String -> String -> Boolean
 startsWith short long = take (length short) long == short
 
 -- Some example SEvents
-click :: SEvent Unit
+click :: forall e. SEvent e Unit
 click = SEvent { event: "onclick"
                , id: "__clickUnit"
                , handle: \_ -> pure (pure unit)}
 
-change :: SEvent String
+change :: forall e. SEvent e String
 change = SEvent { event: "onchange"
                 , id: "__changeValue"
                 , handle: \ev -> pure $ readProp "target" (toForeign ev) >>= readProp "value" >>= readString}
 
-submit :: SEvent Unit
+submit :: forall e. SEvent (dom :: DOM | e) Unit
 submit = SEvent { event: "onsubmit"
                 , id: "__submitunit"
                 , handle: \ev -> preventDefault ev *> pure (pure unit)}
