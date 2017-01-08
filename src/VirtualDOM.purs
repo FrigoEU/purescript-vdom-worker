@@ -23,10 +23,10 @@ foreign import vtext :: String -> VTree
 foreign import createElement :: forall eff. VTree -> Eff (dom :: DOM | eff) Node
 foreign import appendToBody :: forall eff. Node -> Eff (dom :: DOM | eff) Unit
 foreign import diff :: VTree -> VTree -> Array VPatch
-foreign import applyPatch :: forall eff. Node -> SerializedVPatches -> DeserializeHandlers -> Eff (dom :: DOM | eff) Unit
+foreign import applyPatch :: forall eff. Node -> SerializedVPatches -> DeserializeHandlers (dom :: DOM | eff) -> Eff (dom :: DOM | eff) Unit
 
 type FunctionSerializer = forall a. Fn2 String a {prop :: String, id :: String}
-type DeserializeHandlers = String -> (Event -> Eff (dom :: DOM, ownsww :: OwnsWW, err :: EXCEPTION) Unit)
+type DeserializeHandlers e = String -> (Event -> Eff e Unit)
 
 dummyFunctionSerializer :: FunctionSerializer
 dummyFunctionSerializer = mkFn2 (\_ _ -> {prop: "", id: ""})
