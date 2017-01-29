@@ -24,8 +24,8 @@ import WebWorker (WebWorker, OwnsWW)
 import WebWorker.Channel (Channel, postMessageToWorkerC)
 
 newtype SEvent e a = SEvent { event :: String
-                          , id :: String
-                          , handle :: Event -> Eff e (F a)}
+                            , id :: String
+                            , handle :: Event -> Eff e (F a)}
 type SEventS e = Exists (SEvent e)
 
 -- on makes a property (eg: onclick, onchange) based on the SEvent

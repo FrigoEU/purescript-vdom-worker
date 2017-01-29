@@ -47,7 +47,7 @@ src :: String -> Prop
 src = prop "src"
 cl :: String -> Prop
 cl = prop "className"
-style :: String -> Prop
+style :: StrMap String -> Prop
 style = prop "style"
 name :: String -> Prop
 name = prop "name"
