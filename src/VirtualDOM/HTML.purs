@@ -1,5 +1,6 @@
 module VirtualDOM.HTML where
 
+import Data.StrMap (StrMap)
 import VirtualDOM (Prop, vn, prop, VTree)
 
 div :: Array Prop -> Array VTree -> VTree
