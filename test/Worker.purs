@@ -3,17 +3,21 @@ module Test.Worker where
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Ref (REF, writeRef, readRef, newRef)
+import DOM (DOM)
+import DOM.HTML.Types (htmlElementToElement)
+import DOM.Node.Element (setAttribute)
 import Data.Argonaut.Decode (class DecodeJson, gDecodeJson)
 import Data.Argonaut.Encode (class EncodeJson, gEncodeJson)
 import Data.Foreign (toForeign, F, Foreign)
 import Data.Foreign.Class (readProp)
+import Data.Function.Uncurried (mkFn1)
 import Data.Generic (class Generic)
 import Data.Monoid (class Monoid, mempty)
 import Data.StrMap (empty)
-import Prelude ((<<<), pure, class Semigroup, Unit, show, ($), (+), bind)
+import Prelude (class Semigroup, Unit, bind, const, pure, show, unit, ($), (+), (<<<))
 import VirtualDOM (SerializedVPatches, VTree, vtext, serializePatch, diff)
 import VirtualDOM.HTML (div)
-import VirtualDOM.SEvent (SEvent(SEvent), on)
+import VirtualDOM.SEvent (SEvent(SEvent), SHook(..), hook, on)
 import WebWorker (IsWW)
 import WebWorker.Channel (Channel(Channel), onmessageC, registerChannel, postMessageC)
 
@@ -47,7 +51,7 @@ main = do
 testComponent :: Int -> VTree Action
 testComponent n = div ps children
   where
-    ps = [on clickXY Clicked {val: mempty}]
+    ps = [on clickXY Clicked {val: mempty}, hook addRedClass]
     children = [vtext $ show n]
 
 update :: Action -> State -> State
@@ -78,3 +82,9 @@ patchesChannel = Channel "serializedvpatchesyo"
 
 actionsChannel :: Channel Action
 actionsChannel = Channel "weventsmessagesfam"
+
+addRedClass :: forall e. SHook (dom :: DOM | e)
+addRedClass = SHook { hook: mkFn1 (\el -> setAttribute "class" "red" (htmlElementToElement el))
+                    , unhook: mkFn1 (const (pure unit))
+                    , id: "addRedClassHook"
+                    }

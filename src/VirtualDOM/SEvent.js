@@ -32,3 +32,17 @@ function createUntilDone(action){
   }
   return returnVal;
 }
+
+exports.makeHook = function makeHook(o){
+  var Hook = function () {};
+  Hook.prototype.hook = function (node) {
+    if(!node.initialized){
+      node.initialized = true;
+      o.hook(node)();
+    }
+  };
+  Hook.prototype.unhook = function (node) {
+    o.unhook(node)();
+  };
+  return new Hook();
+};

@@ -7,6 +7,11 @@ exports.innerHTML = function(el){
     return el.innerHTML;
   };
 };
+exports.getClass = function(el){
+  return function(){
+    return el.getAttribute("class");
+  };
+};
 
 exports.sendClick = function (el){
   return function (screenX){

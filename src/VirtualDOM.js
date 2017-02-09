@@ -47,13 +47,9 @@ exports.serializePatchImpl = function(functionSerializer){
 var ap = require("vdom-serialized-patch/patch");
 exports.applyPatch = function(node){
   return function(patches){
-    return function(makeDOMHandlers){
+    return function(deserializer){
       return function(){
-        return ap(node, patches, function(str){
-          return function(ev){
-            return makeDOMHandlers(str)(ev)();
-          };
-        });
+        return ap(node, patches, deserializer);
       };
     };
   };

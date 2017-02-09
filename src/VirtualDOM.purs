@@ -17,16 +17,17 @@ import WebWorker (OwnsWW)
 foreign import data VTree :: * -> *
 foreign import data VPatch :: * -> *
 foreign import data SerializedVPatches :: * -> *
+foreign import data MainThreadProp :: *
 
 foreign import vnode :: forall act. String -> (Props act) -> Array (VTree act) -> VTree act
 foreign import vtext :: forall act. String -> VTree act
 foreign import createElement :: forall eff act. VTree act -> Eff (dom :: DOM | eff) Node
 foreign import appendToBody :: forall eff. Node -> Eff (dom :: DOM | eff) Unit
 foreign import diff :: forall act. VTree act -> VTree act -> Array (VPatch act)
-foreign import applyPatch :: forall eff act. Node -> SerializedVPatches act -> DeserializeHandlers (dom :: DOM | eff) -> Eff (dom :: DOM | eff) Unit
+foreign import applyPatch :: forall eff act. Node -> SerializedVPatches act -> Deserializer -> Eff (dom :: DOM | eff) Unit
 
 type FunctionSerializer = forall a. Fn2 String a {prop :: String, id :: String}
-type DeserializeHandlers e = String -> (Event -> Eff e Unit)
+type Deserializer = String -> MainThreadProp
 
 dummyFunctionSerializer :: FunctionSerializer
 dummyFunctionSerializer = mkFn2 (\_ _ -> {prop: "", id: ""})
