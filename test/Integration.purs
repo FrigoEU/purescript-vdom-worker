@@ -38,7 +38,11 @@ testWithWorker =
     liftEff $ appendToBody node
     ww <- liftEff $ mkWorker "testworker.js"
     let allEvents = [mkExists clickXY]
-    let allHooks = [addRedClass]
+    let allHooks = [registerHook
+                      addRedClass
+                      { hook: mkFn1 (\el -> setAttribute "class" "red" (htmlElementToElement el))
+                      , unhook: mkFn1 (const (pure unit))
+                      }]
     let mdh = deserialize allEvents allHooks ww actionsChannel
     let chs = registerChannel empty patchesChannel (\sps -> applyPatch node sps mdh)
     liftEff $ onmessageFromWorkerC ww chs

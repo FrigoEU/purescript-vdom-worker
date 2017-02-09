@@ -83,8 +83,5 @@ patchesChannel = Channel "serializedvpatchesyo"
 actionsChannel :: Channel Action
 actionsChannel = Channel "weventsmessagesfam"
 
-addRedClass :: forall e. SHook (dom :: DOM | e)
-addRedClass = SHook { hook: mkFn1 (\el -> setAttribute "class" "red" (htmlElementToElement el))
-                    , unhook: mkFn1 (const (pure unit))
-                    , id: "addRedClassHook"
-                    }
+addRedClass :: SHook
+addRedClass = SHook { id: "addRedClassHook" }
