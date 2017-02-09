@@ -38,17 +38,17 @@ on :: forall a e obj act.
       SEvent e a
       -> ({val :: a | obj} -> act)
       -> {val :: a | obj}
-      -> Prop
+      -> Prop act
 on (SEvent {event, id}) constr rest =
   prop event ("_vdom_as_json_" <> id <> printJson (encodeJson (constr rest)))
 
 -- special case for actions that don't need any value returned from the UI thread
-on' :: forall a e act. (EncodeJson act) => SEvent e a -> act -> Prop
+on' :: forall a e act. (EncodeJson act) => SEvent e a -> act -> Prop act
 on' (SEvent {event, id}) action =
   prop (event) ("_vdom_as_json_" <> id <> printJson (encodeJson action))
 
 -- The "magic" function just fills the "a" parameter into the "val" property of the action
--- (+ special case for actions ithout val property cf: on')
+-- (+ special case for actions without val property cf: on')
 -- this function is (relatively) safe because on the worker thread the compiler ensured us through the signature of on/on'
 foreign import magic :: forall a act. act -> a -> act
 
@@ -56,8 +56,6 @@ foreign import magic :: forall a act. act -> a -> act
 --   When everything's ok (the event is found and the action is decoded) it fills in the value into the action
 --   and sends the action into the provided Channel
 -- * The SEvents are wrapped in Exists so we can put them all in a single array and iterate over them
--- * it's up to the user of this library to make sure the same "act" type
---   parameter is used on the webworker thread as on the ui thread
 mkUIHandlers' :: forall act e. (EncodeJson act, DecodeJson act) =>
                 Array (SEventS (err :: EXCEPTION | e))
                 -> (act -> Eff (err :: EXCEPTION | e) Unit)

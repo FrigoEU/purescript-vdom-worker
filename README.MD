@@ -8,7 +8,7 @@ http://frigoeu.github.io/vdomworker.html
 
 To test:
 * pulp build
-* pulp test (will fail! Just to build everything.)
+* pulp test
 * npm run buildtestmain && npm run buildtestworker
 * host statictest/ (eg: python -m SimpleHTTPServer)
 * navigate to localhost:8000

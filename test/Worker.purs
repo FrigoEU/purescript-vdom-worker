@@ -44,7 +44,7 @@ main = do
   onmessageC (registerChannel empty actionsChannel dispatch)
   dispatch (Clicked {val: ScreenXY {x: 2, y: 3}})
 
-testComponent :: Int -> VTree
+testComponent :: Int -> VTree Action
 testComponent n = div ps children
   where
     ps = [on clickXY Clicked {val: mempty}]
@@ -68,12 +68,12 @@ extractXY obj = do
   y <- readProp "screenY" obj
   pure $ ScreenXY {x, y}
 
-clickXY :: SEvent ScreenXY
+clickXY :: forall e. SEvent e ScreenXY
 clickXY = SEvent { event: "onclick"
                  , id: "clickXY"
                  , handle: pure <<< extractXY <<< toForeign}
 
-patchesChannel :: Channel SerializedVPatches
+patchesChannel :: Channel (SerializedVPatches Action)
 patchesChannel = Channel "serializedvpatchesyo"
 
 actionsChannel :: Channel Action

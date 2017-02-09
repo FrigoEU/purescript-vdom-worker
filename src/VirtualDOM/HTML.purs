@@ -3,80 +3,80 @@ module VirtualDOM.HTML where
 import Data.StrMap (StrMap)
 import VirtualDOM (Prop, vn, prop, VTree)
 
-div :: Array Prop -> Array VTree -> VTree
+div :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 div = vn "div"
-span :: Array Prop -> Array VTree -> VTree
+span :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 span = vn "span"
-table :: Array Prop -> Array VTree -> VTree
+table :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 table = vn "table"
-tbody :: Array Prop -> Array VTree -> VTree
+tbody :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 tbody = vn "tbody"
-tr :: Array Prop -> Array VTree -> VTree
+tr :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 tr = vn "tr"
-td :: Array Prop -> Array VTree -> VTree
+td :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 td = vn "td"
-th :: Array Prop -> Array VTree -> VTree
+th :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 th = vn "th"
-nav :: Array Prop -> Array VTree -> VTree
+nav :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 nav = vn "nav"
-aside :: Array Prop -> Array VTree -> VTree
+aside :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 aside = vn "aside"
-section :: Array Prop -> Array VTree -> VTree
+section :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 section = vn "section"
-p :: Array Prop -> Array VTree -> VTree
+p :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 p = vn "p"
-button :: Array Prop -> Array VTree -> VTree
+button :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 button = vn "button"
-img :: Array Prop -> Array VTree -> VTree
+img :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 img = vn "img"
-input :: Array Prop -> Array VTree -> VTree
+input :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 input = vn "input"
-i :: Array Prop -> Array VTree -> VTree
+i :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 i = vn "i"
-ul :: Array Prop -> Array VTree -> VTree
+ul :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 ul = vn "ul"
-li :: Array Prop -> Array VTree -> VTree
+li :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 li = vn "li"
-a :: Array Prop -> Array VTree -> VTree
+a :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 a = vn "a"
-form :: Array Prop -> Array VTree -> VTree
+form :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 form = vn "form"
-label :: Array Prop -> Array VTree -> VTree
+label :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 label = vn "form"
 
-src :: String -> Prop
+src :: forall act. String -> Prop act
 src = prop "src"
-cl :: String -> Prop
+cl :: forall act. String -> Prop act
 cl = prop "className"
-style :: StrMap String -> Prop
+style :: forall act. StrMap String -> Prop act
 style = prop "style"
-name :: String -> Prop
+name :: forall act. String -> Prop act
 name = prop "name"
-typeP :: String -> Prop
+typeP :: forall act. String -> Prop act
 typeP = prop "type"
-id :: String -> Prop
+id :: forall act. String -> Prop act
 id = prop "id"
-rowspan :: Int -> Prop
+rowspan :: forall act. Int -> Prop act
 rowspan = prop "rowspan"
-colspan :: Int -> Prop
+colspan :: forall act. Int -> Prop act
 colspan = prop "colspan"
-title :: String -> Prop
+title :: forall act. String -> Prop act
 title = prop "title"
-href :: String -> Prop
+href :: forall act. String -> Prop act
 href = prop "href"
-tabindex :: Int -> Prop
+tabindex :: forall act. Int -> Prop act
 tabindex = prop "tabindex"
-disabled :: Boolean -> Prop
+disabled :: forall act. Boolean -> Prop act
 disabled = prop "disabled"
-selected :: Boolean -> Prop
+selected :: forall act. Boolean -> Prop act
 selected = prop "selected"
-checked :: Boolean -> Prop
+checked :: forall act. Boolean -> Prop act
 checked = prop "checked"
-value :: String -> Prop
+value :: forall act. String -> Prop act
 value = prop "value"
 
-width :: String -> Prop
+width :: forall act. String -> Prop act
 width = prop "width"
 
-height :: String -> Prop
+height :: forall act. String -> Prop act
 height = prop "height"
