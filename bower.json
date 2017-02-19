@@ -20,6 +20,6 @@
     "purescript-eff-functions": "^2.0.0"
   },
   "devDependencies": {
-    "purescript-test-unit": "https://github.com/FrigoEU/purescript-test-unit.git#master"
+    "purescript-test-unit": "10.1.0"
   }
 }

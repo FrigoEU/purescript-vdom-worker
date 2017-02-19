@@ -1,5 +1,7 @@
 "use strict";
 
+/* global console */
+
 /* Stolen from https://github.com/evancz/virtual-dom/blob/master/src/wrapper.js */
 function Thunk(fn, args, thunk) {
   /* public (used by VirtualDom.js) */
@@ -10,6 +12,10 @@ function Thunk(fn, args, thunk) {
   this.fn = fn;
   this.args = args;
   this.thunk = thunk;
+
+  /* debugging */
+  this.failedMemoizations = 0;
+  this.succeededMemoizations = 0;
 }
 
 Thunk.prototype.type = "Thunk";
@@ -17,6 +23,8 @@ Thunk.prototype.render = renderThunk;
 
 function shouldUpdate(current, previous) {
   if (current.fn !== previous.fn) {
+    current.failedMemoizations = (previous.failedMemoizations || 0) + 1;
+    checkFailingMemoization(current);
     return true;
   }
 
@@ -26,11 +34,21 @@ function shouldUpdate(current, previous) {
 
   for (var i = cargs.length; i--; ) {
     if (cargs[i] !== pargs[i]) {
+      current.failedMemoizations = (previous.failedMemoizations || 0) + 1;
+      checkFailingMemoization(current);
       return true;
     }
   }
 
+  current.succeededMemoizations = (previous.succeededMemoizations || 0) + 1;
   return false;
+}
+
+function checkFailingMemoization(current){
+  if (current.failedMemoizations > 5 && current.succeededMemoizations === 0){
+    console.warn("Possible lazyRef not working for node: ");
+    console.dir(current);
+  }
 }
 
 function renderThunk(previous) {
