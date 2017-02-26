@@ -42,7 +42,7 @@ a = vn "a"
 form :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 form = vn "form"
 label :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-label = vn "form"
+label = vn "label"
 
 src :: forall act. String -> Prop act
 src = prop "src"
