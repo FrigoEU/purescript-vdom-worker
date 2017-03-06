@@ -43,6 +43,18 @@ form :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 form = vn "form"
 label :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
 label = vn "label"
+h1 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
+h1 = vn "h1"
+h2 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
+h2 = vn "h2"
+h3 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
+h3 = vn "h3"
+h4 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
+h4 = vn "h4"
+h5 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
+h5 = vn "h5"
+h6 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
+h6 = vn "h6"
 
 src :: forall act. String -> Prop act
 src = prop "src"
