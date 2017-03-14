@@ -88,7 +88,7 @@ deserializeEvent events go =
    -- ^ This string is the string made by on/on', without the "_vdom_as_json_event_" part
          let foundSEvent = find (runExists (\(SEvent {id}) -> startsWith id str)) events
                             -- ^ Trying to find the SEvent by id
-         in maybe (throw ("No event handler found for " <> str))
+         in maybe (throw ("No event handler found for " <> str <>". Add it to your deserialize invocation!"))
                   (runExists (\(SEvent {id, handle}) ->
                      either
                        (\s _ -> throw ("Failed to parse action from " <> str <> ": " <> s))
