@@ -86,6 +86,8 @@ checked :: forall act. Boolean -> Prop act
 checked = prop "checked"
 value :: forall act. String -> Prop act
 value = prop "value"
+placeholder :: forall act. String -> Prop act
+placeholder = prop "placeholder"
 
 width :: forall act. String -> Prop act
 width = prop "width"
