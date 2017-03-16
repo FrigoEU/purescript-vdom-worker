@@ -15,6 +15,7 @@ function Thunk(fn, args, thunk) {
 
   /* debugging */
   this.failedMemoizations = 0;
+  this.failedMemoizationsFn = 0;
   this.succeededMemoizations = 0;
 }
 
@@ -23,7 +24,7 @@ Thunk.prototype.render = renderThunk;
 
 function shouldUpdate(current, previous) {
   if (current.fn !== previous.fn) {
-    current.failedMemoizations = (previous.failedMemoizations || 0) + 1;
+    current.failedMemoizationsFn = (previous.failedMemoizationsFn || 0) + 1;
     checkFailingMemoization(current);
     return true;
   }
@@ -45,8 +46,12 @@ function shouldUpdate(current, previous) {
 }
 
 function checkFailingMemoization(current){
+  if (current.failedMemoizationsFn > 5 && current.succeededMemoizations === 0){
+    console.error("Highly likely lazyRef not working. Component function didn't match. Node: ");
+    console.dir(current);
+  }
   if (current.failedMemoizations > 5 && current.succeededMemoizations === 0){
-    console.warn("Possible lazyRef not working for node: ");
+    console.warn("Possible lazyRef not working. Arguments didn't match. Node: ");
     console.dir(current);
   }
 }
