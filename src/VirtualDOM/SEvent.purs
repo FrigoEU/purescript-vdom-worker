@@ -109,17 +109,24 @@ deserializeHook hooks =
                     (\(RegisteredSHook s) -> pure $ makeHook s)
                     foundSHook
 
--- TODO refactor?
--- Lots of unsafeThrow / unsafePartial stuff here
 deserialize :: forall act e. (EncodeJson act) => (DecodeJson act) =>
                Array (Exists (SEvent (exception :: EXCEPTION, ownsww :: OwnsWW | e)))
                -> Array (RegisteredSHook (exception :: EXCEPTION, ownsww :: OwnsWW | e))
                -> WebWorker -> Channel act
                -> (String -> MainThreadProp)
-deserialize evs hooks ww chan =
+deserialize evs hooks ww chan = deserialize' evs hooks (postMessageToWorkerC ww chan)
+
+-- TODO refactor?
+-- Lots of unsafeThrow / unsafePartial stuff here
+deserialize' :: forall act e. (EncodeJson act) => (DecodeJson act) =>
+                Array (Exists (SEvent (exception :: EXCEPTION, ownsww :: OwnsWW | e)))
+                -> Array (RegisteredSHook (exception :: EXCEPTION, ownsww :: OwnsWW | e))
+                -> (act -> Eff ((exception :: EXCEPTION, ownsww :: OwnsWW | e)) Unit)
+                -> (String -> MainThreadProp)
+deserialize' evs hooks dispatch = 
   \str -> let effMTP =
                 if startsWith "event_" str
-                  then (coerceEventHandler <<< mkEffFn1) <$> deserializeEvent evs (postMessageToWorkerC ww chan) (replace (Pattern "event_") (Replacement "") str)
+                  then (coerceEventHandler <<< mkEffFn1) <$> deserializeEvent evs dispatch (replace (Pattern "event_") (Replacement "") str)
                   else coerceHook <$> deserializeHook hooks (replace (Pattern "hook_") (Replacement "") str)
            in runPure $ unsafePartial (try effMTP <#> (\a -> if isLeft a then unsafeThrow (show $ fromLeft a) else (fromRight a)))
 
