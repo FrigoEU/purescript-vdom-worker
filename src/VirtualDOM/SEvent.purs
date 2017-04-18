@@ -1,4 +1,4 @@
-module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, SHook(..), registerHook, RegisteredSHook(..), hook) where
+module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, deserialize', SHook(..), registerHook, RegisteredSHook(..), hook) where
 
 import Control.Monad.Eff (Eff, runPure)
 import Control.Monad.Eff.Uncurried (EffFn1, mkEffFn1)
