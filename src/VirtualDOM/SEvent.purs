@@ -1,6 +1,7 @@
 module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, SHook(..), registerHook, RegisteredSHook(..), hook) where
 
 import Control.Monad.Eff (Eff, runPure)
+import Control.Monad.Eff.Uncurried (EffFn1, mkEffFn1)
 import Control.Monad.Eff.Exception (EXCEPTION, throw, try)
 import Control.Monad.Eff.Exception.Unsafe (unsafeThrow)
 import Control.Monad.Except (runExcept)
@@ -11,13 +12,12 @@ import DOM.HTML.Types (HTMLElement)
 import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Encode (class EncodeJson, encodeJson)
 import Data.Argonaut.Parser (jsonParser)
-import Data.Argonaut.Printer (printJson)
+import Data.Argonaut.Core (stringify)
 import Data.Either (Either, either, fromLeft, fromRight, isLeft)
 import Data.Exists (Exists, runExists)
 import Data.Foldable (find)
 import Data.Foreign (F, readString, toForeign)
-import Data.Foreign.Class (readProp)
-import Data.Function.Eff (EffFn1, mkEffFn1)
+import Data.Foreign.Index (readProp)
 import Data.Function.Uncurried (Fn2, Fn1)
 import Data.Maybe (maybe)
 import Data.Monoid (class Monoid)
@@ -42,7 +42,7 @@ registerHook :: forall e. SHook -> { hook :: HTMLElement -> Eff e Unit
                                    , unhook :: HTMLElement -> Eff e Unit} -> RegisteredSHook e
 registerHook (SHook {id}) {hook, unhook} = RegisteredSHook {id, hook, unhook}
 
-foreign import data Hook :: *
+foreign import data Hook :: Type
 foreign import makeHook :: forall obj e. { hook :: HTMLElement -> (Eff e Unit)
                                          , unhook :: HTMLElement -> (Eff e Unit) | obj}
                                          -> Hook
@@ -53,18 +53,18 @@ foreign import makeHook :: forall obj e. { hook :: HTMLElement -> (Eff e Unit)
 -- * id of event: we'll use this to identify the event handler that we need to execute. These handlers need to be registred on the UI thread and passed to replaceOnMain since we can't transmit event handlers (= functions!) between threads
 -- * JsonEncoded (partial) action: Here we require that the action constructor takes a record as only argument and this record has a val property with the same type as the value that the handler of the SEvent produces
 on :: forall a e obj act.
-      (Monoid a, EncodeJson act) =>
+      (Monoid a) => (EncodeJson act) =>
       SEvent e a
       -> ({val :: a | obj} -> act)
       -> {val :: a | obj}
       -> Prop act
 on (SEvent {event, id}) constr rest =
-  prop event ("_vdom_as_json_event_" <> id <> printJson (encodeJson (constr rest)))
+  prop event ("_vdom_as_json_event_" <> id <> stringify (encodeJson (constr rest)))
 
 -- special case for actions that don't need any value returned from the UI thread
 on' :: forall a e act. (EncodeJson act) => SEvent e a -> act -> Prop act
 on' (SEvent {event, id}) action =
-  prop (event) ("_vdom_as_json_event_" <> id <> printJson (encodeJson action))
+  prop (event) ("_vdom_as_json_event_" <> id <> stringify (encodeJson action))
 
 hook :: forall act. SHook -> Prop act
 hook (SHook {id}) = prop ("purescript_vdom_worker_hook") ("_vdom_as_json_hook_" <> id)
@@ -78,11 +78,11 @@ foreign import magic :: forall a act. act -> a -> act
 --   When everything's ok (the event is found and the action is decoded) it fills in the value into the action
 --   and sends the action into the provided Channel
 -- * The SEvents are wrapped in Exists so we can put them all in a single array and iterate over them
-deserializeEvent :: forall act e. (EncodeJson act, DecodeJson act) =>
-                    Array (SEventS (err :: EXCEPTION | e)) -- registered events
-                    -> (act -> Eff (err :: EXCEPTION | e) Unit)
+deserializeEvent :: forall act e. (EncodeJson act) => (DecodeJson act) =>
+                    Array (SEventS (exception :: EXCEPTION | e)) -- registered events
+                    -> (act -> Eff (exception :: EXCEPTION | e) Unit)
                     -> (String
-                        -> Eff (err :: EXCEPTION) (Event -> Eff (err :: EXCEPTION | e) Unit))
+                        -> Eff (exception :: EXCEPTION) (Event -> Eff (exception :: EXCEPTION | e) Unit))
 deserializeEvent events go =
   \str ->
    -- ^ This string is the string made by on/on', without the "_vdom_as_json_event_" part
@@ -101,8 +101,8 @@ deserializeEvent events go =
                   foundSEvent
 
 deserializeHook :: forall e.
-                   Array (RegisteredSHook (err :: EXCEPTION | e))
-                   -> (String -> Eff (err :: EXCEPTION) Hook)
+                   Array (RegisteredSHook (exception :: EXCEPTION | e))
+                   -> (String -> Eff (exception :: EXCEPTION) Hook)
 deserializeHook hooks =
   \str -> let foundSHook = find (\(RegisteredSHook {id}) -> startsWith id str) hooks
            in maybe (throw ("No hook found for " <> str))
@@ -111,9 +111,9 @@ deserializeHook hooks =
 
 -- TODO refactor?
 -- Lots of unsafeThrow / unsafePartial stuff here
-deserialize :: forall act e. (EncodeJson act, DecodeJson act) =>
-               Array (Exists (SEvent (err :: EXCEPTION, ownsww :: OwnsWW | e)))
-               -> Array (RegisteredSHook (err :: EXCEPTION, ownsww :: OwnsWW | e))
+deserialize :: forall act e. (EncodeJson act) => (DecodeJson act) =>
+               Array (Exists (SEvent (exception :: EXCEPTION, ownsww :: OwnsWW | e)))
+               -> Array (RegisteredSHook (exception :: EXCEPTION, ownsww :: OwnsWW | e))
                -> WebWorker -> Channel act
                -> (String -> MainThreadProp)
 deserialize evs hooks ww chan =

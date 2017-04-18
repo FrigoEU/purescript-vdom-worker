@@ -1,6 +1,6 @@
 module Test.Main where
 
-import Prelude (class Eq, bind, eq, ($))
+import Prelude (class Eq, bind, eq, ($), discard)
 import Test.Unit (test)
 import Test.Unit.Assert (assert)
 import Test.Unit.Main (runTest)

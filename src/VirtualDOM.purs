@@ -14,10 +14,10 @@ import Prelude (pure, Unit, bind)
 import Unsafe.Coerce (unsafeCoerce)
 import WebWorker (OwnsWW)
 
-foreign import data VTree :: * -> *
-foreign import data VPatch :: * -> *
-foreign import data SerializedVPatches :: * -> *
-foreign import data MainThreadProp :: *
+foreign import data VTree :: Type -> Type
+foreign import data VPatch :: Type -> Type
+foreign import data SerializedVPatches :: Type -> Type
+foreign import data MainThreadProp :: Type
 
 foreign import vnode :: forall act. String -> (Props act) -> Array (VTree act) -> VTree act
 foreign import vtext :: forall act. String -> VTree act
@@ -36,8 +36,8 @@ serializePatch :: forall act. Array (VPatch act) -> (SerializedVPatches act)
 serializePatch = serializePatchImpl dummyFunctionSerializer
 
 
-foreign import data Prop :: * -> *
-foreign import data Props :: * -> *
+foreign import data Prop :: Type -> Type
+foreign import data Props :: Type -> Type
 foreign import prop :: forall a act. String -> a -> Prop act
 foreign import props :: forall act. Array (Prop act) -> Props act
 

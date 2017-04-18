@@ -6,15 +6,17 @@ import Control.Monad.Eff.Ref (REF, writeRef, readRef, newRef)
 import DOM (DOM)
 import DOM.HTML.Types (htmlElementToElement)
 import DOM.Node.Element (setAttribute)
-import Data.Argonaut.Decode (class DecodeJson, gDecodeJson)
-import Data.Argonaut.Encode (class EncodeJson, gEncodeJson)
-import Data.Foreign (toForeign, F, Foreign)
-import Data.Foreign.Class (readProp)
+import Data.Argonaut.Decode (class DecodeJson)
+import Data.Argonaut.Encode (class EncodeJson)
+import Data.Argonaut.Decode.Generic (gDecodeJson)
+import Data.Argonaut.Encode.Generic (gEncodeJson)
+import Data.Foreign (toForeign, F, Foreign, readInt)
+import Data.Foreign.Index (readProp)
 import Data.Function.Uncurried (mkFn1)
 import Data.Generic (class Generic)
 import Data.Monoid (class Monoid, mempty)
 import Data.StrMap (empty)
-import Prelude (class Semigroup, Unit, bind, const, pure, show, unit, ($), (+), (<<<))
+import Prelude (class Semigroup, Unit, bind, const, pure, show, unit, ($), (+), (<<<), discard, (>=>))
 import VirtualDOM (SerializedVPatches, VTree, vtext, serializePatch, diff)
 import VirtualDOM.HTML (div)
 import VirtualDOM.SEvent (SEvent(SEvent), SHook(..), hook, on)
@@ -68,8 +70,8 @@ instance decodeJsonScreenXY :: DecodeJson ScreenXY where decodeJson = gDecodeJso
 
 extractXY :: Foreign -> F ScreenXY
 extractXY obj = do
-  x <- readProp "screenX" obj
-  y <- readProp "screenY" obj
+  x <- (readProp "screenX" >=> readInt) obj
+  y <- (readProp "screenY" >=> readInt) obj
   pure $ ScreenXY {x, y}
 
 clickXY :: forall e. SEvent e ScreenXY
