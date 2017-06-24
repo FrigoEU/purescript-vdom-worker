@@ -1,4 +1,4 @@
-module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, deserialize', SHook(..), registerHook, RegisteredSHook(..), hook) where
+module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, deserialize', SHook(..), registerHook, RegisteredSHook(..), hook, input) where
 
 import Control.Monad.Eff (Eff, runPure)
 import Control.Monad.Eff.Uncurried (EffFn1, mkEffFn1)
@@ -150,6 +150,11 @@ change :: forall e. SEvent e String
 change = SEvent { event: "onchange"
                 , id: "__changeValue"
                 , handle: \ev -> pure $ readProp "target" (toForeign ev) >>= readProp "value" >>= readString}
+
+input :: forall e. SEvent e String
+input = SEvent { event: "oninput"
+               , id: "__changeInput"
+               , handle: \ev -> pure $ readProp "target" (toForeign ev) >>= readProp "value" >>= readString}
 
 submit :: forall e. SEvent (dom :: DOM | e) Unit
 submit = SEvent { event: "onsubmit"
