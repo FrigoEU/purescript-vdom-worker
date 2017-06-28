@@ -1,4 +1,4 @@
-module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, deserialize', SHook(..), registerHook, RegisteredSHook(..), hook, input) where
+module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, deserialize', SHook(..), registerHook, RegisteredSHook(..), hook, input, mousedown) where
 
 import Control.Monad.Eff (Eff, runPure)
 import Control.Monad.Eff.Uncurried (EffFn1, mkEffFn1)
@@ -145,6 +145,11 @@ click :: forall e. SEvent e Unit
 click = SEvent { event: "onclick"
                , id: "__clickUnit"
                , handle: \_ -> pure (pure unit)}
+
+mousedown :: forall e. SEvent e Unit
+mousedown = SEvent { event: "onmousedown"
+                   , id: "__mousedownUnit"
+                   , handle: \_ -> pure (pure unit)}
 
 change :: forall e. SEvent e String
 change = SEvent { event: "onchange"
