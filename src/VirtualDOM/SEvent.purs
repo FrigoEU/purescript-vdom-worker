@@ -23,7 +23,6 @@ import Data.Foreign.Index (readProp)
 import Data.Function.Uncurried (Fn2, Fn1)
 import Data.Generic (class Generic)
 import Data.Maybe (maybe)
-import Data.Monoid (class Monoid)
 import Data.String (Pattern(..), Replacement(..), drop, length, replace, take)
 import Partial.Unsafe (unsafePartial)
 import Prelude (Unit, pure, show, unit, (#), ($), (*>), (<#>), (<$>), (<*>), (<<<), (<>), (==), (>>=), (>>>))
@@ -56,7 +55,7 @@ foreign import makeHook :: forall obj e. { hook :: HTMLElement -> (Eff e Unit)
 -- * id of event: we'll use this to identify the event handler that we need to execute. These handlers need to be registred on the UI thread and passed to replaceOnMain since we can't transmit event handlers (= functions!) between threads
 -- * JsonEncoded (partial) action: Here we require that the action constructor takes a record as only argument and this record has a val property with the same type as the value that the handler of the SEvent produces
 on :: forall a e obj act.
-      (Monoid a) => (EncodeJson act) =>
+      (EncodeJson act) =>
       SEvent e a
       -> ({val :: a | obj} -> act)
       -> {val :: a | obj}
