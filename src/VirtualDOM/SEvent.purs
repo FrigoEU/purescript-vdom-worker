@@ -1,29 +1,32 @@
 module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, deserialize', SHook(..), registerHook, RegisteredSHook(..), hook, input, mousedown) where
 
 import Control.Monad.Eff (Eff, runPure)
-import Control.Monad.Eff.Uncurried (EffFn1, mkEffFn1)
 import Control.Monad.Eff.Exception (EXCEPTION, throw, try)
 import Control.Monad.Eff.Exception.Unsafe (unsafeThrow)
+import Control.Monad.Eff.Uncurried (EffFn1, mkEffFn1)
 import Control.Monad.Except (runExcept)
 import DOM (DOM)
 import DOM.Event.Event (preventDefault)
 import DOM.Event.Types (Event)
 import DOM.HTML.Types (HTMLElement)
-import Data.Argonaut.Decode (class DecodeJson, decodeJson)
-import Data.Argonaut.Encode (class EncodeJson, encodeJson)
-import Data.Argonaut.Parser (jsonParser)
 import Data.Argonaut.Core (stringify)
+import Data.Argonaut.Decode (class DecodeJson, decodeJson)
+import Data.Argonaut.Decode.Generic (gDecodeJson)
+import Data.Argonaut.Encode (class EncodeJson, encodeJson)
+import Data.Argonaut.Encode.Generic (gEncodeJson)
+import Data.Argonaut.Parser (jsonParser)
 import Data.Either (Either, either, fromLeft, fromRight, isLeft)
 import Data.Exists (Exists, runExists)
 import Data.Foldable (find)
-import Data.Foreign (F, readString, toForeign)
+import Data.Foreign (F, readBoolean, readString, toForeign)
 import Data.Foreign.Index (readProp)
 import Data.Function.Uncurried (Fn2, Fn1)
+import Data.Generic (class Generic)
 import Data.Maybe (maybe)
 import Data.Monoid (class Monoid)
 import Data.String (Pattern(..), Replacement(..), drop, length, replace, take)
 import Partial.Unsafe (unsafePartial)
-import Prelude (Unit, pure, show, unit, (#), ($), (*>), (<#>), (<$>), (<<<), (<>), (==), (>>=), (>>>))
+import Prelude (Unit, pure, show, unit, (#), ($), (*>), (<#>), (<$>), (<*>), (<<<), (<>), (==), (>>=), (>>>))
 import Unsafe.Coerce (unsafeCoerce)
 import VirtualDOM (MainThreadProp, Prop, prop)
 import WebWorker (WebWorker, OwnsWW)
@@ -161,7 +164,29 @@ input = SEvent { event: "oninput"
                , id: "__changeInput"
                , handle: \ev -> pure $ readProp "target" (toForeign ev) >>= readProp "value" >>= readString}
 
+keydown :: forall e. SEvent e KeyboardEvent
+keydown = SEvent { event: "oninput"
+                 , id: "__changeInput"
+                 , handle: \ev -> pure $ KeyboardEvent <$> 
+                            ({key: _, ctrlKey: _, metaKey: _, altKey: _, shiftKey: _} <$>
+                             (readProp "key" (toForeign ev) >>= readString) <*>
+                             (readProp "ctrlKey" (toForeign ev) >>= readBoolean) <*>
+                             (readProp "metaKey" (toForeign ev) >>= readBoolean) <*>
+                             (readProp "altKey" (toForeign ev) >>= readBoolean) <*>
+                             (readProp "shiftKey" (toForeign ev) >>= readBoolean))
+                          }
+
 submit :: forall e. SEvent (dom :: DOM | e) Unit
 submit = SEvent { event: "onsubmit"
                 , id: "__submitunit"
                 , handle: \ev -> preventDefault ev *> pure (pure unit)}
+
+data KeyboardEvent = KeyboardEvent { key :: String
+                                   , ctrlKey :: Boolean
+                                   , metaKey :: Boolean
+                                   , altKey :: Boolean
+                                   , shiftKey :: Boolean
+                                   }
+derive instance genericKeyboardEvent :: Generic KeyboardEvent
+instance encodeJsonKeyboardEvent :: EncodeJson KeyboardEvent where encodeJson = gEncodeJson
+instance decodeJsonKeyboardEvent :: DecodeJson KeyboardEvent where decodeJson = gDecodeJson
