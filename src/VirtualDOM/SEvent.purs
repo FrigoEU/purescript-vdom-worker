@@ -165,8 +165,8 @@ input = SEvent { event: "oninput"
                , handle: \ev -> pure $ readProp "target" (toForeign ev) >>= readProp "value" >>= readString}
 
 keydown :: forall e. SEvent e KeyboardEvent
-keydown = SEvent { event: "oninput"
-                 , id: "__changeInput"
+keydown = SEvent { event: "onkeydown"
+                 , id: "__keyDownEvent"
                  , handle: \ev -> pure $ KeyboardEvent <$> 
                             ({key: _, ctrlKey: _, metaKey: _, altKey: _, shiftKey: _} <$>
                              (readProp "key" (toForeign ev) >>= readString) <*>
