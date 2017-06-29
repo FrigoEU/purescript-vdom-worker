@@ -1,4 +1,4 @@
-module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, deserialize', SHook(..), registerHook, RegisteredSHook(..), hook, input, mousedown) where
+module VirtualDOM.SEvent (on, on', SEvent(..), SEventS, click, change, submit, magic, deserialize, deserialize', SHook(..), registerHook, RegisteredSHook(..), hook, input, mousedown, keydown, KeyboardEvent(..)) where
 
 import Control.Monad.Eff (Eff, runPure)
 import Control.Monad.Eff.Exception (EXCEPTION, throw, try)
