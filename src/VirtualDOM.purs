@@ -41,9 +41,6 @@ foreign import data Props :: Type -> Type
 foreign import prop :: forall a act. String -> a -> Prop act
 foreign import props :: forall act. Array (Prop act) -> Props act
 
-vn :: forall act. String -> Array (Prop act) -> Array (VTree act) -> (VTree act)
-vn tag ps = vnode tag (props ps)
-
 instance encodeJsonSerializedVPatches :: EncodeJson (SerializedVPatches act) where
   encodeJson obj = jsonSingletonObject "VirtualDOM.SerializedVPatches" (unsafeCoerce obj :: Json)
 

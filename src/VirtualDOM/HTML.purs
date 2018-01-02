@@ -1,96 +1,103 @@
 module VirtualDOM.HTML where
 
 import Data.StrMap (StrMap)
-import VirtualDOM (Prop, vn, prop, VTree)
+import VirtualDOM (Prop, prop, VTree, vnode, props)
+
+-- Note: Writing this in fully applied style (instead of point-free) so
+-- uncurrying can work
 
 div :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-div = vn "div"
+div ps = vnode "div" (props ps)
 span :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-span = vn "span"
+span ps = vnode "span" (props ps)
 table :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-table = vn "table"
+table ps = vnode "table" (props ps)
 tbody :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-tbody = vn "tbody"
+tbody ps = vnode "tbody" (props ps)
 tr :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-tr = vn "tr"
+tr ps = vnode "tr" (props ps)
 td :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-td = vn "td"
+td ps = vnode "td" (props ps)
 th :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-th = vn "th"
+th ps = vnode "th" (props ps)
 nav :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-nav = vn "nav"
+nav ps = vnode "nav" (props ps)
 aside :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-aside = vn "aside"
+aside ps = vnode "aside" (props ps)
 section :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-section = vn "section"
+section ps = vnode "section" (props ps)
 p :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-p = vn "p"
+p ps = vnode "p" (props ps)
 button :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-button = vn "button"
+button ps = vnode "button" (props ps)
 img :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-img = vn "img"
-input :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-input = vn "input"
+img ps = vnode "img" (props ps)
+input :: forall act. Array (Prop act) -> VTree act
+input ps = vnode "input" (props ps) []
+select :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
+select ps = vnode "select" (props ps)
+option :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
+option ps = vnode "option" (props ps)
 i :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-i = vn "i"
+i ps = vnode "i" (props ps)
 ul :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-ul = vn "ul"
+ul ps = vnode "ul" (props ps)
 li :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-li = vn "li"
+li ps = vnode "li" (props ps)
 a :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-a = vn "a"
+a ps = vnode "a" (props ps)
 form :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-form = vn "form"
+form ps = vnode "form" (props ps)
 label :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-label = vn "label"
+label ps = vnode "label" (props ps)
 h1 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h1 = vn "h1"
+h1 ps = vnode "h1" (props ps)
 h2 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h2 = vn "h2"
+h2 ps = vnode "h2" (props ps)
 h3 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h3 = vn "h3"
+h3 ps = vnode "h3" (props ps)
 h4 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h4 = vn "h4"
+h4 ps = vnode "h4" (props ps)
 h5 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h5 = vn "h5"
+h5 ps = vnode "h5" (props ps)
 h6 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h6 = vn "h6"
+h6 ps = vnode "h6" (props ps)
 
 src :: forall act. String -> Prop act
-src = prop "src"
+src v = prop "src" v
 cl :: forall act. String -> Prop act
-cl = prop "className"
+cl v = prop "className" v
 style :: forall act. StrMap String -> Prop act
-style = prop "style"
+style v = prop "style" v
 name :: forall act. String -> Prop act
-name = prop "name"
+name v = prop "name" v
 typeP :: forall act. String -> Prop act
-typeP = prop "type"
+typeP v = prop "type" v
 id :: forall act. String -> Prop act
-id = prop "id"
+id v = prop "id" v
 rowspan :: forall act. Int -> Prop act
-rowspan = prop "rowspan"
+rowspan v = prop "rowspan" v
 colspan :: forall act. Int -> Prop act
-colspan = prop "colspan"
+colspan v = prop "colspan" v
 title :: forall act. String -> Prop act
-title = prop "title"
+title v = prop "title" v
 href :: forall act. String -> Prop act
-href = prop "href"
+href v = prop "href" v
 tabindex :: forall act. Int -> Prop act
-tabindex = prop "tabindex"
+tabindex v = prop "tabindex" v
 disabled :: forall act. Boolean -> Prop act
-disabled = prop "disabled"
+disabled v = prop "disabled" v
 selected :: forall act. Boolean -> Prop act
-selected = prop "selected"
+selected v = prop "selected" v
 checked :: forall act. Boolean -> Prop act
-checked = prop "checked"
+checked v = prop "checked" v
 value :: forall act. String -> Prop act
-value = prop "value"
+value v = prop "value" v
 placeholder :: forall act. String -> Prop act
-placeholder = prop "placeholder"
+placeholder v = prop "placeholder" v
 
 width :: forall act. String -> Prop act
-width = prop "width"
+width v = prop "width" v
 
 height :: forall act. String -> Prop act
-height = prop "height"
+height v = prop "height" v
