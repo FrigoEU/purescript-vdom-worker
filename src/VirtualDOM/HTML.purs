@@ -7,61 +7,61 @@ import VirtualDOM (Prop, prop, VTree, vnode, props)
 -- uncurrying can work
 
 div :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-div ps = vnode "div" (props ps)
+div ps cs = vnode "div" (props ps) cs
 span :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-span ps = vnode "span" (props ps)
+span ps cs = vnode "span" (props ps) cs
 table :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-table ps = vnode "table" (props ps)
+table ps cs = vnode "table" (props ps) cs
 tbody :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-tbody ps = vnode "tbody" (props ps)
+tbody ps cs = vnode "tbody" (props ps) cs
 tr :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-tr ps = vnode "tr" (props ps)
+tr ps cs = vnode "tr" (props ps) cs
 td :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-td ps = vnode "td" (props ps)
+td ps cs = vnode "td" (props ps) cs
 th :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-th ps = vnode "th" (props ps)
+th ps cs = vnode "th" (props ps) cs
 nav :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-nav ps = vnode "nav" (props ps)
+nav ps cs = vnode "nav" (props ps) cs
 aside :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-aside ps = vnode "aside" (props ps)
+aside ps cs = vnode "aside" (props ps) cs
 section :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-section ps = vnode "section" (props ps)
+section ps cs = vnode "section" (props ps) cs
 p :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-p ps = vnode "p" (props ps)
+p ps cs = vnode "p" (props ps) cs
 button :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-button ps = vnode "button" (props ps)
+button ps cs = vnode "button" (props ps) cs
 img :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-img ps = vnode "img" (props ps)
+img ps cs = vnode "img" (props ps) cs
 input :: forall act. Array (Prop act) -> VTree act
 input ps = vnode "input" (props ps) []
 select :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-select ps = vnode "select" (props ps)
+select ps cs = vnode "select" (props ps) cs
 option :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-option ps = vnode "option" (props ps)
+option ps cs = vnode "option" (props ps) cs
 i :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-i ps = vnode "i" (props ps)
+i ps cs = vnode "i" (props ps) cs
 ul :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-ul ps = vnode "ul" (props ps)
+ul ps cs = vnode "ul" (props ps) cs
 li :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-li ps = vnode "li" (props ps)
+li ps cs = vnode "li" (props ps) cs
 a :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-a ps = vnode "a" (props ps)
+a ps cs = vnode "a" (props ps) cs
 form :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-form ps = vnode "form" (props ps)
+form ps cs = vnode "form" (props ps) cs
 label :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-label ps = vnode "label" (props ps)
+label ps cs = vnode "label" (props ps) cs
 h1 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h1 ps = vnode "h1" (props ps)
+h1 ps cs = vnode "h1" (props ps) cs
 h2 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h2 ps = vnode "h2" (props ps)
+h2 ps cs = vnode "h2" (props ps) cs
 h3 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h3 ps = vnode "h3" (props ps)
+h3 ps cs = vnode "h3" (props ps) cs
 h4 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h4 ps = vnode "h4" (props ps)
+h4 ps cs = vnode "h4" (props ps) cs
 h5 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h5 ps = vnode "h5" (props ps)
+h5 ps cs = vnode "h5" (props ps) cs
 h6 :: forall act. Array (Prop act) -> Array (VTree act) -> VTree act
-h6 ps = vnode "h6" (props ps)
+h6 ps cs = vnode "h6" (props ps) cs
 
 src :: forall act. String -> Prop act
 src v = prop "src" v
