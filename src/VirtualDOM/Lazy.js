@@ -15,8 +15,6 @@ function Thunk(fn, args, thunk) {
 
   /* debugging */
   this.failedMemoizations = 0;
-  this.failedMemoizationsFn = 0;
-  this.succeededMemoizations = 0;
 }
 
 Thunk.prototype.type = "Thunk";
@@ -24,8 +22,6 @@ Thunk.prototype.render = renderThunk;
 
 function shouldUpdate(current, previous) {
   if (current.fn !== previous.fn) {
-    current.failedMemoizationsFn = (previous.failedMemoizationsFn || 0) + 1;
-    checkFailingMemoization(current);
     return true;
   }
 
@@ -35,25 +31,20 @@ function shouldUpdate(current, previous) {
 
   for (var i = cargs.length; i--; ) {
     if (cargs[i] !== pargs[i]) {
-      current.failedMemoizations = (previous.failedMemoizations || 0) + 1;
-      checkFailingMemoization(current);
+      if (typeof cargs[i] === "function" && typeof pargs[i] === "function"){
+        current.failedMemoizations = (previous.failedMemoizations || 0) + 1;
+        if (current.failedMemoizations > 5){
+          console.warn("Possible lazyRef not working. Function argument five times not equal. Node: ");
+          console.dir(current);
+        }
+      }
       return true;
     }
   }
 
-  current.succeededMemoizations = (previous.succeededMemoizations || 0) + 1;
-  return false;
-}
+  current.failedMemoizations = 0;
 
-function checkFailingMemoization(current){
-  if (current.failedMemoizationsFn > 5 && current.succeededMemoizations === 0){
-    console.error("Highly likely lazyRef not working. Component function didn't match. Node: ");
-    console.dir(current);
-  }
-  if (current.failedMemoizations > 5 && current.succeededMemoizations === 0){
-    console.warn("Possible lazyRef not working. Arguments didn't match. Node: ");
-    console.dir(current);
-  }
+  return false;
 }
 
 function renderThunk(previous) {
