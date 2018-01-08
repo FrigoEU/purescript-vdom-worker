@@ -1,18 +1,12 @@
 module VirtualDOM where
 
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception (EXCEPTION)
 import DOM (DOM)
-import DOM.Event.Event (Event)
 import DOM.Node.Types (Node)
-import Data.Argonaut.Core (jsonSingletonObject, JObject, Json)
-import Data.Argonaut.Decode (class DecodeJson, decodeJson)
-import Data.Argonaut.Decode.Combinators ((.?))
-import Data.Argonaut.Encode (class EncodeJson)
+import Data.Foreign (Foreign, F, unsafeFromForeign)
+import Data.Foreign.Index (readProp)
 import Data.Function.Uncurried (mkFn2, Fn2)
 import Prelude (pure, Unit, bind)
-import Unsafe.Coerce (unsafeCoerce)
-import WebWorker (OwnsWW)
 
 foreign import data VTree :: Type -> Type
 foreign import data VPatch :: Type -> Type
@@ -41,11 +35,12 @@ foreign import data Props :: Type -> Type
 foreign import prop :: forall a act. String -> a -> Prop act
 foreign import props :: forall act. Array (Prop act) -> Props act
 
-instance encodeJsonSerializedVPatches :: EncodeJson (SerializedVPatches act) where
-  encodeJson obj = jsonSingletonObject "VirtualDOM.SerializedVPatches" (unsafeCoerce obj :: Json)
+foreign import stringify :: forall act. {"VirtualDOM.SerializedVPatches" :: SerializedVPatches act} -> String
+foreign import parse :: String -> Foreign
 
-instance decodeJsonSerializedVPatches :: DecodeJson (SerializedVPatches act) where
-  decodeJson obj = do
-    jobj :: JObject <- decodeJson obj
-    servps :: Json <- jobj .? "VirtualDOM.SerializedVPatches"
-    pure (unsafeCoerce servps :: SerializedVPatches act)
+encodePatches :: forall act. SerializedVPatches act -> String
+encodePatches obj = stringify {"VirtualDOM.SerializedVPatches": obj}
+decodePatches :: forall act. String -> F (SerializedVPatches act)
+decodePatches str = do
+  (obj :: Foreign) <- readProp "VirtualDOM.SerializedVPatches" (parse str)
+  pure (unsafeFromForeign obj)

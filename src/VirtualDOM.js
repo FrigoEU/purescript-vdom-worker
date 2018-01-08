@@ -69,3 +69,6 @@ exports.props = function(arr){
   }
   return obj;
 };
+
+exports.stringify = JSON.stringify;
+exports.parse = JSON.parse;
