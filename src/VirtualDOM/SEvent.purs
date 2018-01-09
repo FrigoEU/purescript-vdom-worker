@@ -166,7 +166,7 @@ input = SEvent { event: "oninput"
 keydown :: forall e. SEvent e KeyboardEvent
 keydown = SEvent { event: "onkeydown"
                  , id: "__keyDownEvent"
-                 , handle: \ev -> pure $ KeyboardEvent <$> 
+                 , handle: \ev -> pure $
                             ({key: _, ctrlKey: _, metaKey: _, altKey: _, shiftKey: _} <$>
                              (readProp "key" (toForeign ev) >>= readString) <*>
                              (readProp "ctrlKey" (toForeign ev) >>= readBoolean) <*>
@@ -180,9 +180,9 @@ submit = SEvent { event: "onsubmit"
                 , id: "__submitunit"
                 , handle: \ev -> preventDefault ev *> pure (pure unit)}
 
-data KeyboardEvent = KeyboardEvent { key :: String
-                                   , ctrlKey :: Boolean
-                                   , metaKey :: Boolean
-                                   , altKey :: Boolean
-                                   , shiftKey :: Boolean
-                                   }
+type KeyboardEvent = { key :: String
+                     , ctrlKey :: Boolean
+                     , metaKey :: Boolean
+                     , altKey :: Boolean
+                     , shiftKey :: Boolean
+                     }

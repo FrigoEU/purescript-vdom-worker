@@ -30,7 +30,7 @@ function shouldUpdate(current, previous) {
   var pargs = previous.args;
 
   for (var i = cargs.length; i--; ) {
-    if (cargs[i] !== pargs[i]) {
+    if (cargs[i] !== pargs[i] && !cargs[i]["__ignoreInLazy"]){
       if (typeof cargs[i] === "function" && typeof pargs[i] === "function"){
         current.failedMemoizations = (previous.failedMemoizations || 0) + 1;
         if (current.failedMemoizations > 5){
@@ -99,3 +99,9 @@ exports.lazyRef7Impl = function lazyRef7Impl(fn, a, b, c, d, e, f, g) {
   }
   return new Thunk(fn, [a,b,c,d,e,f,g], thunk);
 };
+
+exports.ignoreInLazy = function(a){
+  a.__ignoreInLazy = true;
+  return a;
+};
+

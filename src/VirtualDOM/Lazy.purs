@@ -3,6 +3,7 @@ module VirtualDOM.Lazy where
 import Data.Function.Uncurried (Fn2, Fn3, Fn4, Fn5, Fn6, Fn7, Fn8, runFn2, runFn3, runFn4, runFn5, runFn6, runFn7, runFn8)
 import VirtualDOM (VTree)
 
+foreign import ignoreInLazy :: forall a. a -> a
 foreign import lazyRef1Impl :: forall a act. Fn2 (a -> VTree act) a (VTree act)
 lazyRef1 :: forall a act. (a -> VTree act) -> a -> VTree act
 lazyRef1 = runFn2 lazyRef1Impl
